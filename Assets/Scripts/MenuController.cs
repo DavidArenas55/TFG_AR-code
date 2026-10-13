@@ -1,8 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Xml;
+using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MenuController : MonoBehaviour
 {
@@ -16,6 +19,7 @@ public class MenuController : MonoBehaviour
     [Header("Scenario Creator")]
     public Button CreateScenarioButton;
     public GameObject CreateScenarioWindow;
+    public TMP_InputField scenarioNameInputField;
     public Toggle ringToggle; public Toggle arcToggle; public Toggle cylinderToggle; public Toggle tunnelToggle; public Toggle squareToggle; public Toggle wallToggle;
     public Toggle HtakeoffToggle; public Toggle HlandToggle;
     public Toggle bigGem1Toggle; public Toggle bigGem2Toggle;
@@ -61,7 +65,6 @@ public class MenuController : MonoBehaviour
     private int selectedItemId = -1;
     private Color normalColor = new Color(1f, 1f, 1f, 0f); // Transparente
     private Color selectedColor = new Color(0.7f, 0.7f, 1f, 0.5f); // Tono resaltado
-  
 
     void Start()
     {
@@ -567,6 +570,8 @@ public class MenuController : MonoBehaviour
 
     void OnSaveClicked()
     {
+        string scenarioName = scenarioNameInputField.text;
+
         ConnectionConfig.SelectedScenario = ConnectionConfig.Scenario.Custom;
 
         ConnectionConfig.CustomHasStopwatch = false;
@@ -602,6 +607,14 @@ public class MenuController : MonoBehaviour
             ConnectionConfig.CustomCountdownTime = 0f;
         }
 
+        // Guardar el escenario
+        ScenarioPersistence.SaveScenario(
+            scenarioName,
+            ConnectionConfig.CustomScenarioObjects,
+            ConnectionConfig.CustomHasStopwatch,
+            ConnectionConfig.CustomHasCountdown,
+            ConnectionConfig.CustomCountdownTime
+        );
         CreateScenarioWindow.SetActive(false);
         ValidatePlay();
     }
