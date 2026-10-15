@@ -17,12 +17,11 @@ public class SavedScenariosController : MonoBehaviour
 
     void Start()
     {
-        LoadScenarioList();
         loadButton.onClick.AddListener(OnLoadClicked);
         deleteButton.onClick.AddListener(OnDeleteClicked);
     }
 
-    void LoadScenarioList()
+    public void LoadScenarioList()
     {
         savedScenarioNames = ScenarioPersistence.GetSavedScenarioNames();
 
@@ -45,11 +44,16 @@ public class SavedScenariosController : MonoBehaviour
             }
         }
     }
+    public void ClearScenarioList()
+    {
+        foreach (Transform child in content)
+        {
+            Destroy(child.gameObject);
+        }
+    }
     void SelectScenario(string scenarioName)
     {
         selectedScenarioName = scenarioName;
-
-        Debug.Log("Escenario seleccionado: " + selectedScenarioName);
     }
     void OnLoadClicked()
     {
@@ -78,13 +82,6 @@ public class SavedScenariosController : MonoBehaviour
     }
     void OnDeleteClicked()
     {
-        foreach (Transform child in content)
-        {
-            Destroy(child.gameObject);
-        }
-
-        savedScenarioNames = ScenarioPersistence.GetSavedScenarioNames();
-
         if (string.IsNullOrEmpty(selectedScenarioName))
         {
             Debug.Log("No hay ningún escenario seleccionado.");
@@ -95,7 +92,15 @@ public class SavedScenariosController : MonoBehaviour
 
         if (deleted)
         {
+            ClearScenarioList();
             LoadScenarioList();
+
+            if (ConnectionConfig.CustomScenarioName == selectedScenarioName)
+            {
+                ConnectionConfig.CustomScenarioName = "";
+                ConnectionConfig.SelectedScenario = ConnectionConfig.Scenario.None;
+            }
+
             selectedScenarioName = null;
         }
     }

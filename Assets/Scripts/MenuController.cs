@@ -599,7 +599,6 @@ public class MenuController : MonoBehaviour
         }
 
         ConnectionConfig.CustomScenarioName = scenarioName;
-
         ConnectionConfig.SelectedScenario = ConnectionConfig.Scenario.Custom;
 
         ConnectionConfig.CustomHasStopwatch = false;
@@ -636,15 +635,25 @@ public class MenuController : MonoBehaviour
         }
 
         // Guardar el escenario
-        ScenarioPersistence.SaveScenario(
+        bool saved = ScenarioPersistence.SaveScenario(
             scenarioName,
             ConnectionConfig.CustomScenarioObjects,
             ConnectionConfig.CustomHasStopwatch,
             ConnectionConfig.CustomHasCountdown,
             ConnectionConfig.CustomCountdownTime
         );
-        CreateScenarioWindow.SetActive(false);
-        ValidatePlay();
+
+        if (saved)
+        {
+            UpdateSelectedCustomScenarioText();
+            CreateScenarioWindow.SetActive(false);
+            ValidatePlay();
+        }
+        else
+        {
+            debugText2.text = "Ya existe un escenario con ese nombre.";
+            return;
+        }       
     }
 
     void onCreateScenarioBackClicked()
@@ -655,10 +664,13 @@ public class MenuController : MonoBehaviour
 
     void onSavedScenariosClicked()
     {
+        savedScenariosController.ClearScenarioList();
+        savedScenariosController.LoadScenarioList();
         SavedScenariosWindow.SetActive(true);
     }
     void onSavedScenariosBackClicked()
     {
+        UpdateSelectedCustomScenarioText();
         savedScenariosController.ClearSelection();
         SavedScenariosWindow.SetActive(false);
     }

@@ -24,7 +24,7 @@ public static class ScenarioPersistence
         }
     }
 
-    public static void SaveScenario(
+    public static bool SaveScenario(
         string scenarioName,
         List<ScenarioObjectData> objects,
         bool hasStopwatch,
@@ -34,7 +34,7 @@ public static class ScenarioPersistence
         if (string.IsNullOrWhiteSpace(scenarioName))
         {
             Debug.LogError("No se puede guardar un escenario sin nombre.");
-            return;
+            return false;
         }
 
         Directory.CreateDirectory(ScenariosFolder);
@@ -55,9 +55,16 @@ public static class ScenarioPersistence
             MakeSafeFileName(scenarioName) + ".json"
         );
 
+        if (File.Exists(filePath))
+        {
+            Debug.LogError("Ya existe un escenario con el nombre: " + scenarioName);
+            return false;
+        }
+
         File.WriteAllText(filePath, json);
 
         Debug.Log("Escenario guardado en: " + filePath);
+        return true;
     }
 
     public static CustomScenarioSaveData LoadScenario(string scenarioName)
