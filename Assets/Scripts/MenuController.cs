@@ -19,6 +19,7 @@ public class MenuController : MonoBehaviour
     [Header("Scenario Creator")]
     public Button CreateScenarioButton;
     public GameObject CreateScenarioWindow;
+    public Button SavedSenariosButton;
     public TMP_InputField scenarioNameInputField;
     public Toggle ringToggle; public Toggle arcToggle; public Toggle cylinderToggle; public Toggle tunnelToggle; public Toggle squareToggle; public Toggle wallToggle;
     public Toggle HtakeoffToggle; public Toggle HlandToggle;
@@ -36,6 +37,13 @@ public class MenuController : MonoBehaviour
     public Button removeGameObjectButton;
     public Text debugText2;
     public Button saveScenarioButton;
+    public Button createScenarioBackButton;
+
+    [Header("Saved Scenarios")]
+    public Button savedScenariosBackButton;
+    public GameObject SavedScenariosWindow;
+    public TMP_Text selectedCustomScenarioText;
+    public SavedScenariosController savedScenariosController;
 
     [Header("Place on Map")]
     public Button placeOnMapButton;    
@@ -83,8 +91,9 @@ public class MenuController : MonoBehaviour
         comInputField.text = ConnectionConfig.ComPort; comInputField.interactable = productionToggle.isOn;
 
         droneFlowToggle.isOn = false; circuitToggle.isOn = false; easyToggle.isOn = false; hardToggle.isOn = false; searchToggle.isOn = false;
-        ConnectionConfig.SelectedScenario = ConnectionConfig.Scenario.None;
-        ConnectionConfig.ConnectRequested = false;
+        //Comentamos estas dos lineas para mantener es escenario carrgado
+        //ConnectionConfig.SelectedScenario = ConnectionConfig.Scenario.None;
+        //ConnectionConfig.ConnectRequested = false;
 
         simulationToggle.onValueChanged.AddListener(OnSimulationToggle);
         productionToggle.onValueChanged.AddListener(OnProductionToggle);
@@ -100,6 +109,9 @@ public class MenuController : MonoBehaviour
 
         CreateScenarioWindow.SetActive(false);
         CreateScenarioButton.onClick.AddListener(OnCreateScenarioClicked);
+
+        SavedScenariosWindow.SetActive(false);
+        SavedSenariosButton.onClick.AddListener(onSavedScenariosClicked);
 
         InitInputsState();
 
@@ -135,12 +147,16 @@ public class MenuController : MonoBehaviour
         addGameObjectButton.onClick.AddListener(OnAddGameObjectClicked);
         removeGameObjectButton.onClick.AddListener(OnRemoveGameObjectClicked);
         saveScenarioButton.onClick.AddListener(OnSaveClicked);
+        createScenarioBackButton.onClick.AddListener(onCreateScenarioBackClicked);
+
+        savedScenariosBackButton.onClick.AddListener(onSavedScenariosBackClicked);
 
         if (placeOnMapButton != null) placeOnMapButton.onClick.AddListener(OpenMap);
         if (savePositionButton != null) savePositionButton.onClick.AddListener(SaveMapPosition);
         if (mapPanel != null) mapPanel.SetActive(false);
         if (marker != null) marker.gameObject.SetActive(false);
 
+        UpdateSelectedCustomScenarioText();
         ValidatePlay();
     }
 
@@ -572,6 +588,18 @@ public class MenuController : MonoBehaviour
     {
         string scenarioName = scenarioNameInputField.text;
 
+        if (string.IsNullOrWhiteSpace(scenarioName))
+        {
+            if (debugText2 != null)
+            {
+                debugText2.text = "Error: The 'Scenario Name' field is obligatory.";
+                debugText2.color = Color.red;
+            }
+            return;
+        }
+
+        ConnectionConfig.CustomScenarioName = scenarioName;
+
         ConnectionConfig.SelectedScenario = ConnectionConfig.Scenario.Custom;
 
         ConnectionConfig.CustomHasStopwatch = false;
@@ -617,6 +645,22 @@ public class MenuController : MonoBehaviour
         );
         CreateScenarioWindow.SetActive(false);
         ValidatePlay();
+    }
+
+    void onCreateScenarioBackClicked()
+    {
+        savedScenariosController.ClearSelection();
+        CreateScenarioWindow.SetActive(false);
+    }
+
+    void onSavedScenariosClicked()
+    {
+        SavedScenariosWindow.SetActive(true);
+    }
+    void onSavedScenariosBackClicked()
+    {
+        savedScenariosController.ClearSelection();
+        SavedScenariosWindow.SetActive(false);
     }
 
     void DeselectAllExcluding(string groupType, Toggle activeToggle)
@@ -1039,5 +1083,21 @@ public class MenuController : MonoBehaviour
         longitudeInputField.text = selectedLon.ToString("F8");
 
         CloseMap();
+    }
+    void UpdateSelectedCustomScenarioText()
+    {
+        if (selectedCustomScenarioText == null)
+            return;
+
+        if (ConnectionConfig.SelectedScenario == ConnectionConfig.Scenario.Custom &&
+            !string.IsNullOrEmpty(ConnectionConfig.CustomScenarioName))
+        {
+            selectedCustomScenarioText.text =
+                "Selected: " + ConnectionConfig.CustomScenarioName;
+        }
+        else
+        {
+            selectedCustomScenarioText.text = "Selected: None";
+        }
     }
 }

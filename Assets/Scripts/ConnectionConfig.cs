@@ -16,6 +16,7 @@ public static class ConnectionConfig
 
     public static List<ScenarioObjectData> CustomScenarioObjects = new List<ScenarioObjectData>();
 
+    public static string CustomScenarioName = "";
     public static bool CustomHasStopwatch = false;
     public static bool CustomHasCountdown = false;
     public static float CustomCountdownTime = 0f; // Convertido en segundos
