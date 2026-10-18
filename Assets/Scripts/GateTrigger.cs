@@ -40,6 +40,7 @@ public class GateTrigger : MonoBehaviour
     public void OnEntry(Collider drone)
     {
         if (completed) return;
+        Debug.Log($"[GATE {waypointIndex}] 🟢 EntryTrigger detectado");
 
         // Comprobación de orden
         RaceTimer raceTimer = FindFirstObjectByType<RaceTimer>();
@@ -50,7 +51,7 @@ public class GateTrigger : MonoBehaviour
              ConnectionConfig.SelectedScenario == ConnectionConfig.Scenario.DroneFlow ||
              ConnectionConfig.SelectedScenario == ConnectionConfig.Scenario.Custom))
         {
-            Debug.Log($"Ignorando puerta {waypointIndex} porque el orden es incorrecto. El dron va por la {raceTimer.targetsCollected}");
+            Debug.Log($"[GATE {waypointIndex}] ❌ Orden incorrecto. El dron va por la {raceTimer.targetsCollected}");
             IniciarParpadeo(materialIncorrecto);
             return;
         }
@@ -64,12 +65,12 @@ public class GateTrigger : MonoBehaviour
         if (posicionLocal.z < 0)
         {
             inside = true;
-            Debug.Log("Entrada correcta ✅. Z local was: " + posicionLocal.z);
+            Debug.Log($"[GATE {waypointIndex}] ✅ Entrada correcta. Z local: {posicionLocal.z}");
             IniciarParpadeo(materialCorrecto);
         }
         else
         {
-            Debug.Log($"Entrada incorrecta ❌. Z local was: {posicionLocal.z}");
+            Debug.Log($"[GATE {waypointIndex}] ❌ Entrada incorrecta. Z local: {posicionLocal.z}");
             IniciarParpadeo(materialIncorrecto);
         }
     }
@@ -78,6 +79,7 @@ public class GateTrigger : MonoBehaviour
     public void OnEntryExit(Collider drone)
     {
         if (completed) return;
+        Debug.Log($"[GATE {waypointIndex}] 🚪 EntryTrigger salido. inside = {inside}");
 
         // Si salimos de la zona de entrada (hacia adelante o hacia atrás), detenemos el parpadeo
         DetenerParpadeo();
@@ -90,7 +92,7 @@ public class GateTrigger : MonoBehaviour
             if (posicionLocal.z < 0)
             {
                 inside = false;
-                Debug.Log("Entrada anulada: El dron ha retrocedido 🔙");
+                Debug.Log($"[GATE {waypointIndex}] 🔙 Entrada anulada: el dron ha retrocedido");
             }
         }
     }
@@ -100,7 +102,7 @@ public class GateTrigger : MonoBehaviour
         if (completed || !inside) return;
 
         inside = false;
-        Debug.Log("Pasada por puerta invalidada debido a choque 💥.");
+        Debug.Log($"[GATE {waypointIndex}] 💥 Pasada invalidada debido a choque");
 
         DetenerParpadeo();
         StartCoroutine(DestelloError());
@@ -110,12 +112,14 @@ public class GateTrigger : MonoBehaviour
     {
         if (!inside || completed) return;
 
+        Debug.Log($"[GATE {waypointIndex}] 🚪 ExitTrigger detectado. inside = {inside}");
+
         completed = true;
         inside = false;
 
         DetenerParpadeo();
         SetMaterial(materialDesactivado);
-        Debug.Log("Gate completado 🎯");
+        Debug.Log($"[GATE {waypointIndex}] 🎯 Gate completado");
         if (UIManager.Instance != null)
             UIManager.Instance.ShowNotification("Gate Completed!");
 
@@ -125,7 +129,7 @@ public class GateTrigger : MonoBehaviour
             // SI ESTE ERA EL ÚLTIMO OBJETIVO ABSOLUTO, FORZA EL FINAL PARA GANAR
             if (isFinalTarget)
             {
-                Debug.Log("¡End Game Object atravesado! Finalizando juego inmediatamente.");
+                Debug.Log($"[GATE {waypointIndex}] 🏁 Era el objetivo final. Finalizando juego");
                 raceTimer.StopTimer();
                 raceTimer.openResultsButton.gameObject.SetActive(true);
                 raceTimer.GameOver.SetActive(true);
@@ -142,6 +146,7 @@ public class GateTrigger : MonoBehaviour
     {
         // Si ya está completada o ya ha entrado al trigger real válido, no hacemos nada
         if (completed || inside) return;
+        Debug.Log($"[GATE {waypointIndex}] 🟡 WarningTrigger detectado");
 
         RaceTimer raceTimer = FindFirstObjectByType<RaceTimer>();
         bool isCorrectOrder = (raceTimer != null && raceTimer.targetsCollected == waypointIndex);
@@ -152,11 +157,13 @@ public class GateTrigger : MonoBehaviour
              ConnectionConfig.SelectedScenario == ConnectionConfig.Scenario.DroneFlow ||
              ConnectionConfig.SelectedScenario == ConnectionConfig.Scenario.Custom))
         {
+            Debug.Log($"[GATE {waypointIndex}] ❌ Warning: orden incorrecto. El dron va por la {raceTimer.targetsCollected}");
             IniciarParpadeo(materialIncorrecto);
             return;
         }
 
         Vector3 posicionLocal = directionReference.InverseTransformPoint(drone.transform.position);
+        Debug.Log($"[GATE {waypointIndex}] 🟡 Warning: Z local = {posicionLocal.z}");
 
         // Evaluamos en qué lado del aro espacialmente está el dron AHORA MISMO
         if (posicionLocal.z < 0)
@@ -174,6 +181,7 @@ public class GateTrigger : MonoBehaviour
     public void OnWarningExit()
     {
         if (completed || inside) return;
+        Debug.Log($"[GATE {waypointIndex}] 🟡 WarningTrigger salido");
 
         // Se abortó la aproximación
         DetenerParpadeo();
@@ -183,7 +191,7 @@ public class GateTrigger : MonoBehaviour
     public void OnDangerEnter(Collider drone)
     {
         if (completed) return;
-
+        Debug.Log($"[GATE {waypointIndex}] 🔴 DangerTrigger detectado");
         // Un destello rojo más rápido
         DetenerParpadeo();
         parpadeoCoroutine = StartCoroutine(RutinaParpadeoRapido(materialCollision));
@@ -192,6 +200,7 @@ public class GateTrigger : MonoBehaviour
     public void OnDangerExit(Collider drone)
     {
         if (completed) return;
+        Debug.Log($"[GATE {waypointIndex}] 🔴 DangerTrigger salido");
 
         // Al salir de la zona de peligro sin chocar, vuelve a evaluar donde está usando la lógica de OnWarning 
         // o simplemente lo apagas y esperas que la próxima área le dé color.

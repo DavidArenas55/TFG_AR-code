@@ -71,6 +71,10 @@ public class SavedScenariosController : MonoBehaviour
         }
 
         ConnectionConfig.CustomScenarioObjects = data.objects;
+        foreach (var obj in ConnectionConfig.CustomScenarioObjects)
+        {
+            Debug.Log($"CARGADO: id={obj.id}, type={obj.type}, circuitTarget={obj.circuitTarget}");
+        }
         ConnectionConfig.CustomHasStopwatch = data.hasStopwatch;
         ConnectionConfig.CustomHasCountdown = data.hasCountdown;
         ConnectionConfig.CustomCountdownTime = data.countdownTime;

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using Newtonsoft.Json;
 
 [Serializable]
 public class CustomScenarioSaveData
@@ -48,7 +49,7 @@ public static class ScenarioPersistence
             countdownTime = countdownTime
         };
 
-        string json = JsonUtility.ToJson(data, true);
+        string json = JsonConvert.SerializeObject(data, Formatting.Indented);
 
         string filePath = Path.Combine(
             ScenariosFolder,
@@ -83,7 +84,7 @@ public static class ScenarioPersistence
         string json = File.ReadAllText(filePath);
 
         CustomScenarioSaveData data =
-            JsonUtility.FromJson<CustomScenarioSaveData>(json);
+            JsonConvert.DeserializeObject<CustomScenarioSaveData>(json);
 
         return data;
     }
