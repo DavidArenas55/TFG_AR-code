@@ -36,6 +36,7 @@ public class ScenarioObjectData
     // Campos dependientes del "type" (Anulables)
     public int? width;
     public int? height;
+    public float? scale; //Radio del anillo 0.01 = 2m
     public string rotation;
     public bool? scoreTarget;
     public bool? circuitTarget;
