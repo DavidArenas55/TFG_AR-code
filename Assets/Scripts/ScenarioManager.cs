@@ -186,17 +186,13 @@ public class ScenarioManager : MonoBehaviour
                         case "Ring":
                             Vector3 ringPosition = position + new Vector3(0, -1f, 0);
                             instantiatedObj = Instantiate(Ring, ringPosition, rotation, scenarioCustom.transform);
-                            float ringScale = obj.scale ?? 0.01f;
+                            float ringDiameter = obj.diameter ?? 2f;
+                            float ringScale = ringDiameter / 200f;
 
                             instantiatedObj.transform.localScale = new Vector3(
                                 ringScale,
                                 ringScale,
                                 ringScale
-                            );
-                            Debug.Log(
-                                $"RING SCALE: JSON={obj.scale}, " +
-                                $"localScale={instantiatedObj.transform.localScale}, " +
-                                $"lossyScale={instantiatedObj.transform.lossyScale}"
                             );
                             break;
 

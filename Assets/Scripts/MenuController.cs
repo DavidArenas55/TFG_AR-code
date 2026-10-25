@@ -26,6 +26,7 @@ public class MenuController : MonoBehaviour
     public Toggle bigGem1Toggle; public Toggle bigGem2Toggle;
     public Toggle gem1Toggle; public Toggle gem2Toggle; public Toggle gem3Toggle; public Toggle gem4Toggle; public Toggle gem5Toggle; public Toggle gem6Toggle; public Toggle gem7Toggle; public Toggle gem8Toggle;
     public InputField latitudeInputField; public InputField longitudeInputField; public InputField altitudeInputField; public InputField headingInputField;
+    public InputField diameterInputField;
     public InputField widthInputField; public InputField heightInputField;
     public Toggle clockwiseToggle; public Toggle counterclockwiseToggle;
     public Toggle scoreTargetToggle; public Toggle circuitTargetToggle; public Toggle endGameObjectToggle; public Toggle gemsRandomPositionToggle; public InputField numberOfGemsInputField;
@@ -115,7 +116,7 @@ public class MenuController : MonoBehaviour
 
         InitInputsState();
 
-        ringToggle.onValueChanged.AddListener((val) => { if (val) OnStandardObstacleSelected(ringToggle); });
+        ringToggle.onValueChanged.AddListener((val) => { if (val) OnRingSelected(); });
         arcToggle.onValueChanged.AddListener((val) => { if (val) OnStandardObstacleSelected(arcToggle); });
         tunnelToggle.onValueChanged.AddListener((val) => { if (val) OnStandardObstacleSelected(tunnelToggle); });
         squareToggle.onValueChanged.AddListener((val) => { if (val) OnStandardObstacleSelected(squareToggle); });
@@ -214,7 +215,7 @@ public class MenuController : MonoBehaviour
         CreateScenarioWindow.SetActive(true);
     }
 
-    void AddGameObjectToList(int id, string type, double latitude, double longitude, double altitude, double heading, int? width, int? height, string rotation, bool? scoreTarget, bool? circuitTarget, bool? endGameObject, bool? gemsRandomPosition, int? numberOfGems, bool? stopwatchObject, string destructionMethod)
+    void AddGameObjectToList(int id, string type, double latitude, double longitude, double altitude, double heading, float? diameter, int? width, int? height, string rotation, bool? scoreTarget, bool? circuitTarget, bool? endGameObject, bool? gemsRandomPosition, int? numberOfGems, bool? stopwatchObject, string destructionMethod)
     {
         ScenarioObjectData newObject = new ScenarioObjectData
         {
@@ -224,6 +225,7 @@ public class MenuController : MonoBehaviour
             longitude = longitude,
             altitude = altitude,
             heading = heading,
+            diameter = diameter,
             width = width,
             height = height,
             rotation = rotation,
@@ -368,6 +370,32 @@ public class MenuController : MonoBehaviour
             }
         }
 
+        float? diameter = null;
+        if (diameterInputField.interactable)
+        {
+            if (!float.TryParse(diameterInputField.text, out float d))
+            {
+                if (debugText2 != null)
+                {
+                    debugText2.text = "Error: 'Diameter' must be a valid number.";
+                    debugText2.color = Color.red;
+                }
+                return;
+            }
+
+            if (d <= 0)
+            {
+                if (debugText2 != null)
+                {
+                    debugText2.text = "Error: 'Diameter' must be greater than 0.";
+                    debugText2.color = Color.red;
+                }
+                return;
+            }
+
+            diameter = d;
+        }
+
         int? width = null;
         if (widthInputField.interactable)
         {
@@ -456,7 +484,7 @@ public class MenuController : MonoBehaviour
             }
         }
 
-        AddGameObjectToList(id, objectType, lat, lon, alt, heading, width, height, rotation, isScoreTarget, isCircuitTarget, isEndGameObject, isGemsRandomPosition, numOfGems, isStopwatchObject, destMethod);
+        AddGameObjectToList(id, objectType, lat, lon, alt, heading, diameter, width, height, rotation, isScoreTarget, isCircuitTarget, isEndGameObject, isGemsRandomPosition, numOfGems, isStopwatchObject, destMethod);
 
         RefreshListUI(); // Función que redibuja todo con sus IDs nuevos
 
@@ -703,7 +731,7 @@ public class MenuController : MonoBehaviour
         }
 
         // Estabilizamos configuraciones base de Input y Setup Toggles
-        widthInputField.interactable = false; heightInputField.interactable = false;
+        widthInputField.interactable = false; heightInputField.interactable = false; diameterInputField.interactable = false;
         clockwiseToggle.interactable = false; clockwiseToggle.isOn = false; counterclockwiseToggle.interactable = false; counterclockwiseToggle.isOn = false;
         scoreTargetToggle.interactable = false; scoreTargetToggle.isOn = false;
         endGameObjectToggle.interactable = false; endGameObjectToggle.isOn = false;
@@ -728,6 +756,11 @@ public class MenuController : MonoBehaviour
             {
                 case "Standard":
                     // Setup básico + Permitir habilitar End Game Object
+                    endGameObjectToggle.interactable = true;
+                    break;
+
+                case "Ring":
+                    diameterInputField.interactable = true;
                     endGameObjectToggle.interactable = true;
                     break;
 
@@ -771,6 +804,11 @@ public class MenuController : MonoBehaviour
     void OnStandardObstacleSelected(Toggle caller)
     {
         DeselectAllExcluding("Standard", caller);
+    }
+
+    void OnRingSelected()
+    {
+        DeselectAllExcluding("Ring", ringToggle);
     }
 
     void OnCylinderSelected()
