@@ -3225,23 +3225,11 @@ MonoBehaviour:
   debugText2: {fileID: 895936043}
   saveScenarioButton: {fileID: 1423093949}
   createScenarioBackButton: {fileID: 1768766435}
+  mapPositionSelector: {fileID: 1599748967}
   savedScenariosBackButton: {fileID: 716468375}
   SavedScenariosWindow: {fileID: 360578782}
   selectedCustomScenarioText: {fileID: 1936357322}
   savedScenariosController: {fileID: 360578784}
-  placeOnMapButton: {fileID: 794869416}
-  mapPanel: {fileID: 30628049}
-  mapRect: {fileID: 113408764}
-  marker: {fileID: 321245272}
-  savePositionButton: {fileID: 120383239}
-  latTopLeft: 41.2764282
-  lonTopLeft: 1.9882138
-  latTopRight: 41.2766189
-  lonTopRight: 1.9890228
-  latBottomRight: 41.2763519
-  lonBottomRight: 1.9891436
-  latBottomLeft: 41.2761573
-  lonBottomLeft: 1.9883241
   id: 0
   droneFlowToggle: {fileID: 699313331}
   droneFlowDropdown: {fileID: 983838822}
@@ -22107,6 +22095,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1595394844}
   m_CullTransparentMesh: 1
+--- !u!1 &1599748966
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1599748968}
+  - component: {fileID: 1599748967}
+  m_Layer: 0
+  m_Name: MapPositionSelector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1599748967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1599748966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90a5575a91f4d674588ac4beddca8971, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MapPositionSelector
+  placeOnMapButton: {fileID: 794869416}
+  mapPanel: {fileID: 30628049}
+  mapRect: {fileID: 113408764}
+  marker: {fileID: 321245272}
+  savePositionButton: {fileID: 120383239}
+  latTopLeft: 41.2764282
+  lonTopLeft: 1.9882138
+  latTopRight: 41.2766189
+  lonTopRight: 1.9890228
+  latBottomRight: 41.2763519
+  lonBottomRight: 1.9891436
+  latBottomLeft: 41.2761573
+  lonBottomLeft: 1.9883241
+--- !u!4 &1599748968
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1599748966}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 433.4262, y: 245.69383, z: -2.13971}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1599900900
 GameObject:
   m_ObjectHideFlags: 0
@@ -27986,3 +28031,4 @@ SceneRoots:
   - {fileID: 199253881}
   - {fileID: 1892698851}
   - {fileID: 564399445}
+  - {fileID: 1599748968}
