@@ -1,7 +1,4 @@
-using Newtonsoft.Json;
-using NUnit.Framework;
 using System.Collections.Generic;
-using System.Xml;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -42,12 +39,10 @@ public class MenuController : MonoBehaviour
     public MapPositionSelector mapPositionSelector;
 
     [Header("Saved Scenarios")]
-    public Button savedScenariosBackButton;
-    public GameObject SavedScenariosWindow;
     public TMP_Text selectedCustomScenarioText;
     public SavedScenariosController savedScenariosController;
 
-    [Header("Place on Map")]  
+    [Header("Place on Map")]
 
     public int id = 0;
 
@@ -98,7 +93,6 @@ public class MenuController : MonoBehaviour
         CreateScenarioWindow.SetActive(false);
         CreateScenarioButton.onClick.AddListener(OnCreateScenarioClicked);
 
-        SavedScenariosWindow.SetActive(false);
         SavedSenariosButton.onClick.AddListener(onSavedScenariosClicked);
 
         InitInputsState();
@@ -136,8 +130,6 @@ public class MenuController : MonoBehaviour
         removeGameObjectButton.onClick.AddListener(OnRemoveGameObjectClicked);
         saveScenarioButton.onClick.AddListener(OnSaveClicked);
         createScenarioBackButton.onClick.AddListener(onCreateScenarioBackClicked);
-
-        savedScenariosBackButton.onClick.AddListener(onSavedScenariosBackClicked);
 
         if (mapPositionSelector != null)
             mapPositionSelector.PositionSelected += OnPositionSelected;
@@ -666,28 +658,22 @@ public class MenuController : MonoBehaviour
         {
             debugText2.text = "Ya existe un escenario con ese nombre.";
             return;
-        }       
+        }
     }
-    
+
     void onCreateScenarioBackClicked()
     {
         savedScenariosController.ClearSelection();
         CreateScenarioWindow.SetActive(false);
     }
-
     void onSavedScenariosClicked()
     {
-        savedScenariosController.ClearScenarioList();
-        savedScenariosController.LoadScenarioList();
-        SavedScenariosWindow.SetActive(true);
+        savedScenariosController.Open();
     }
-    void onSavedScenariosBackClicked()
+    void OnSavedScenariosClosed()
     {
         UpdateSelectedCustomScenarioText();
-        savedScenariosController.ClearSelection();
-        SavedScenariosWindow.SetActive(false);
     }
-
     void DeselectAllExcluding(string groupType, Toggle activeToggle)
     {
         // Prevenir bucle infinito provocado por isOn = false
@@ -804,7 +790,7 @@ public class MenuController : MonoBehaviour
         counterclockwiseToggle.isOn = true; clockwiseToggle.isOn = false;
     }
 
-    void OnClockwiseSelected (bool on)
+    void OnClockwiseSelected(bool on)
     {
         if (!clockwiseToggle.interactable) return; // Ignorar si están deshabilitados
 
@@ -818,7 +804,7 @@ public class MenuController : MonoBehaviour
         }
     }
 
-    void OnCounterclockwiseSelected (bool on)
+    void OnCounterclockwiseSelected(bool on)
     {
         if (!counterclockwiseToggle.interactable) return; // Ignorar si están deshabilitados
 
@@ -1038,7 +1024,7 @@ public class MenuController : MonoBehaviour
         {
             Debug.LogError("CONNECT falló al iniciar la conexión real: " + DroneConnectionManager.Instance.LastError);
             connectionYESImage.SetActive(false);
-            debugText.text = "Error connecting: " + DroneConnectionManager.Instance.LastError; 
+            debugText.text = "Error connecting: " + DroneConnectionManager.Instance.LastError;
             debugText.color = Color.red;
             ConnectionConfig.ConnectRequested = false;
             playButton.interactable = false;

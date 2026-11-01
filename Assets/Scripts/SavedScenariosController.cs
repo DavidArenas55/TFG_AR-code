@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using static UnityEditor.Progress;
 using UnityEngine.UI;
+using System;
 
 public class SavedScenariosController : MonoBehaviour
 {
@@ -12,15 +12,28 @@ public class SavedScenariosController : MonoBehaviour
     public Button loadButton;
     public Button deleteButton;
 
+    [Header("Window")]
+    public GameObject savedScenariosWindow;
+    public Button backButton;
+
     private List<string> savedScenarioNames;
     private string selectedScenarioName;
+    public event Action Closed;
 
     void Start()
     {
         loadButton.onClick.AddListener(OnLoadClicked);
         deleteButton.onClick.AddListener(OnDeleteClicked);
-    }
+        backButton.onClick.AddListener(OnBackClicked);
 
+        savedScenariosWindow.SetActive(false);
+    }
+    public void Open()
+    {
+        ClearScenarioList();
+        LoadScenarioList();
+        savedScenariosWindow.SetActive(true);
+    }
     public void LoadScenarioList()
     {
         savedScenarioNames = ScenarioPersistence.GetSavedScenarioNames();
@@ -111,5 +124,11 @@ public class SavedScenariosController : MonoBehaviour
     public void ClearSelection()
     {
         selectedScenarioName = null;
+    }
+    void OnBackClicked()
+    {
+        ClearSelection();
+        savedScenariosWindow.SetActive(false);
+        Closed?.Invoke();
     }
 }

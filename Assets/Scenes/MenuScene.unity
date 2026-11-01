@@ -3226,8 +3226,6 @@ MonoBehaviour:
   saveScenarioButton: {fileID: 1423093949}
   createScenarioBackButton: {fileID: 1768766435}
   mapPositionSelector: {fileID: 1599748967}
-  savedScenariosBackButton: {fileID: 716468375}
-  SavedScenariosWindow: {fileID: 360578782}
   selectedCustomScenarioText: {fileID: 1936357322}
   savedScenariosController: {fileID: 360578784}
   id: 0
@@ -5077,6 +5075,8 @@ MonoBehaviour:
   scenarioItemPrefab: {fileID: 2587977733495514673, guid: 9f720c1f4c4f4ad40ad0afdea201e1f0, type: 3}
   loadButton: {fileID: 109663964}
   deleteButton: {fileID: 146629142}
+  savedScenariosWindow: {fileID: 360578782}
+  backButton: {fileID: 716468375}
 --- !u!1 &381480658
 GameObject:
   m_ObjectHideFlags: 0
