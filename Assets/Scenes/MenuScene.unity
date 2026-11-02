@@ -2307,6 +2307,96 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 145758892}
   m_CullTransparentMesh: 1
+--- !u!1 &146293076
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 146293078}
+  - component: {fileID: 146293077}
+  m_Layer: 0
+  m_Name: ScenarioCreatorController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &146293077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 146293076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d2b890673a77804d929b5afbb2ce489, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScenarioCreatorController
+  scenarioNameInputField: {fileID: 1595394846}
+  ringToggle: {fileID: 314291329}
+  arcToggle: {fileID: 1284015450}
+  cylinderToggle: {fileID: 2073972646}
+  tunnelToggle: {fileID: 531377892}
+  squareToggle: {fileID: 544534221}
+  wallToggle: {fileID: 1995634949}
+  HtakeoffToggle: {fileID: 1066047238}
+  HlandToggle: {fileID: 1887464151}
+  bigGem1Toggle: {fileID: 53121427}
+  bigGem2Toggle: {fileID: 97661586}
+  gem1Toggle: {fileID: 1700327659}
+  gem2Toggle: {fileID: 126544678}
+  gem3Toggle: {fileID: 1745970468}
+  gem4Toggle: {fileID: 1059344623}
+  gem5Toggle: {fileID: 750607254}
+  gem6Toggle: {fileID: 1137268813}
+  gem7Toggle: {fileID: 327600799}
+  gem8Toggle: {fileID: 799752188}
+  latitudeInputField: {fileID: 1701883729}
+  longitudeInputField: {fileID: 1350835892}
+  altitudeInputField: {fileID: 1436085248}
+  headingInputField: {fileID: 1993033493}
+  diameterInputField: {fileID: 722944118}
+  widthInputField: {fileID: 1991406467}
+  heightInputField: {fileID: 950169411}
+  clockwiseToggle: {fileID: 1743974201}
+  counterclockwiseToggle: {fileID: 1126705791}
+  scoreTargetToggle: {fileID: 108450398}
+  circuitTargetToggle: {fileID: 138315346}
+  endGameObjectToggle: {fileID: 835848202}
+  gemsRandomPositionToggle: {fileID: 1768950630}
+  numberOfGemsInputField: {fileID: 1849372968}
+  stopwatchToggle: {fileID: 1338919305}
+  countdownToggle: {fileID: 1193742217}
+  timeLimitInputField: {fileID: 775012775}
+  destroyShootToggle: {fileID: 726159144}
+  destroyCollideToggle: {fileID: 1955772294}
+  addGameObjectButton: {fileID: 1185954182}
+  ScrollViewContent: {fileID: 288463231}
+  listItemPrefab: {fileID: 9159177274219581575, guid: 4b2b68fb4886eff4fb65525d9e1d4edb, type: 3}
+  removeGameObjectButton: {fileID: 480190885}
+  debugText2: {fileID: 895936043}
+  saveScenarioButton: {fileID: 1423093949}
+  mapPositionSelector: {fileID: 1599748967}
+  scenarioCreatorWindowController: {fileID: 13243965}
+--- !u!4 &146293078
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 146293076}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1171.9349, y: 710.13165, z: 5.30992}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &146629140
 GameObject:
   m_ObjectHideFlags: 0
@@ -3224,7 +3314,6 @@ MonoBehaviour:
   connectButton: {fileID: 156889797}
   playButton: {fileID: 328576259}
   CreateScenarioButton: {fileID: 1124344005}
-  CreateScenarioWindow: {fileID: 1178006210}
   SavedSenariosButton: {fileID: 593139456}
   scenarioNameInputField: {fileID: 1595394846}
   ringToggle: {fileID: 314291329}
@@ -3270,7 +3359,6 @@ MonoBehaviour:
   removeGameObjectButton: {fileID: 480190885}
   debugText2: {fileID: 895936043}
   saveScenarioButton: {fileID: 1423093949}
-  createScenarioBackButton: {fileID: 1768766435}
   mapPositionSelector: {fileID: 1599748967}
   scenarioCreatorWindowController: {fileID: 13243965}
   selectedCustomScenarioText: {fileID: 1936357322}
@@ -15908,17 +15996,17 @@ RectTransform:
   - {fileID: 108450397}
   - {fileID: 138315345}
   - {fileID: 835848201}
-  - {fileID: 726159143}
-  - {fileID: 1955772293}
   - {fileID: 1768950629}
   - {fileID: 1849372967}
-  - {fileID: 1185954181}
   - {fileID: 1491712436}
   - {fileID: 549451579}
   - {fileID: 919576897}
   - {fileID: 1338919304}
   - {fileID: 1193742216}
   - {fileID: 775012774}
+  - {fileID: 726159143}
+  - {fileID: 1955772293}
+  - {fileID: 1185954181}
   - {fileID: 25244486}
   - {fileID: 480190884}
   - {fileID: 2085914550}
@@ -28080,3 +28168,4 @@ SceneRoots:
   - {fileID: 564399445}
   - {fileID: 1599748968}
   - {fileID: 13243966}
+  - {fileID: 146293078}

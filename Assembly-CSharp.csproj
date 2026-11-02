@@ -74,6 +74,7 @@
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\Internal\CDT\CDT_DelaunayTetrahedralization.cs" />
     <Compile Include="Assets\Scripts\GemProximityDestroy.cs" />
     <Compile Include="Assets\Scripts\GameResults.cs" />
+    <Compile Include="Assets\Scripts\Scenario\PresetScenarios\SearchScenario.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\Internal\DisjointSet.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Examples\Scripts\CameraController.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\Internal\CustomComparator.cs" />
@@ -98,10 +99,13 @@
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\Internal\GeometricObject.cs" />
     <Compile Include="Assets\AssignSavedMeshes.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Aztech Games\GemsAndCrystals\Script\Rotate.cs" />
+    <Compile Include="Assets\Scripts\Scenario\PresetScenarios\MazeScenario.cs" />
+    <Compile Include="Assets\Scripts\Scenario\PresetScenarios\DroneFlowScenario.cs" />
     <Compile Include="Assets\Scripts\ResultsDisplay.cs" />
     <Compile Include="Assets\Scripts\ConnectionConfig.cs" />
     <Compile Include="Assets\SaveMeshesEditor.cs" />
-    <Compile Include="Assets\Scripts\ScenarioManager.cs" />
+    <Compile Include="Assets\Scripts\Scenario\PresetScenarios\CircuitScenario.cs" />
+    <Compile Include="Assets\Scripts\Scenario\ScenarioManager.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\Internal\CV\ClippedVoronoi.cs" />
     <Compile Include="Assets\Scripts\TooltipUI.cs" />
   </ItemGroup>
