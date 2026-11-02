@@ -49,8 +49,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\WorldAnchor.cs" />
+    <Compile Include="Assets\Scripts\UI\Scenario\ScenarioCreatorController.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\Internal\CDT\CDT_Filter.cs" />
     <Compile Include="Assets\Scripts\DroneCollision.cs" />
+    <Compile Include="Assets\Scripts\UI\Scenario\ScenarioCreatorWindowController.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Examples\Scripts\MeshDemolisherExample.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\MeshDemolisher.cs" />
     <Compile Include="Assets\Scripts\GateTrigger.cs" />

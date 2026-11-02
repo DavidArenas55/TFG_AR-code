@@ -213,6 +213,52 @@ MonoBehaviour:
     to the altitude where the base of the object will be.\n\nThe heading represents
     the normal of the ENTRY plane if the direction of rotation is clockwise or of
     the EXIT plane if it is counterclockwise.\n\n"
+--- !u!1 &13243964
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 13243966}
+  - component: {fileID: 13243965}
+  m_Layer: 0
+  m_Name: ScenarioCreatorWindowController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &13243965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 13243964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a16926a1b663a014e9fe7aaaadf91584, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScenarioCreatorWindowController
+  createScenarioWindow: {fileID: 1178006210}
+  backButton: {fileID: 1768766435}
+--- !u!4 &13243966
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 13243964}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1171.9349, y: 710.13165, z: 5.30992}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &13700725
 GameObject:
   m_ObjectHideFlags: 0
@@ -3226,6 +3272,7 @@ MonoBehaviour:
   saveScenarioButton: {fileID: 1423093949}
   createScenarioBackButton: {fileID: 1768766435}
   mapPositionSelector: {fileID: 1599748967}
+  scenarioCreatorWindowController: {fileID: 13243965}
   selectedCustomScenarioText: {fileID: 1936357322}
   savedScenariosController: {fileID: 360578784}
   id: 0
@@ -28032,3 +28079,4 @@ SceneRoots:
   - {fileID: 1892698851}
   - {fileID: 564399445}
   - {fileID: 1599748968}
+  - {fileID: 13243966}
