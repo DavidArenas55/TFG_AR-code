@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +10,10 @@ public class CustomScenarioSaveData
 {
     public string name;
     public List<ScenarioObjectData> objects = new List<ScenarioObjectData>();
+
+    // Si el JSON antiguo no contiene este campo, se utilizará GPS.
+    public ConnectionConfig.CoordinateSystem coordinateSystem =
+        ConnectionConfig.CoordinateSystem.GPS;
 
     public bool hasStopwatch;
     public bool hasCountdown;
@@ -30,7 +35,9 @@ public static class ScenarioPersistence
         List<ScenarioObjectData> objects,
         bool hasStopwatch,
         bool hasCountdown,
-        float countdownTime)
+        float countdownTime,
+        ConnectionConfig.CoordinateSystem coordinateSystem =
+            ConnectionConfig.CoordinateSystem.GPS)
     {
         if (string.IsNullOrWhiteSpace(scenarioName))
         {
@@ -44,6 +51,7 @@ public static class ScenarioPersistence
         {
             name = scenarioName,
             objects = objects,
+            coordinateSystem = coordinateSystem,
             hasStopwatch = hasStopwatch,
             hasCountdown = hasCountdown,
             countdownTime = countdownTime

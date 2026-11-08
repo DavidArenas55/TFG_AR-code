@@ -84,6 +84,8 @@ public class SavedScenariosController : MonoBehaviour
         }
 
         ConnectionConfig.CustomScenarioObjects = data.objects;
+        ConnectionConfig.CustomCoordinateSystem = data.coordinateSystem;
+
         foreach (var obj in ConnectionConfig.CustomScenarioObjects)
         {
             Debug.Log($"CARGADO: id={obj.id}, type={obj.type}, circuitTarget={obj.circuitTarget}");
@@ -116,6 +118,7 @@ public class SavedScenariosController : MonoBehaviour
             {
                 ConnectionConfig.CustomScenarioName = "";
                 ConnectionConfig.SelectedScenario = ConnectionConfig.Scenario.None;
+                ConnectionConfig.CustomCoordinateSystem = ConnectionConfig.CoordinateSystem.GPS;
             }
 
             selectedScenarioName = null;

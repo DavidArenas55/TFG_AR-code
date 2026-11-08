@@ -58,6 +58,7 @@
     <Compile Include="Assets\Scripts\GateTrigger.cs" />
     <Compile Include="Assets\Scripts\GemaSpawner.cs" />
     <Compile Include="Assets\Scripts\RaceTimer.cs" />
+    <Compile Include="Assets\Scripts\Coordinates\GPSCoordinateConverter.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\TextToMesh.cs" />
     <Compile Include="Assets\Scripts\MenuController.cs" />
     <Compile Include="Assets\Scripts\SceneManagement.cs" />

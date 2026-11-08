@@ -1,8 +1,6 @@
 using csDronLink;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using UnityEngine;
 
 public class FenceGenerator : MonoBehaviour
