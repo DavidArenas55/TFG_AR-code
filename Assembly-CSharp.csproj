@@ -107,6 +107,7 @@
     <Compile Include="Assets\Scripts\Scenario\PresetScenarios\CircuitScenario.cs" />
     <Compile Include="Assets\Scripts\Scenario\ScenarioManager.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\Internal\CV\ClippedVoronoi.cs" />
+    <Compile Include="Assets\Scripts\Scenario\CustomScenario.cs" />
     <Compile Include="Assets\Scripts\TooltipUI.cs" />
   </ItemGroup>
   <ItemGroup>
