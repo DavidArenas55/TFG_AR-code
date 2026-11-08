@@ -1,6 +1,5 @@
 using UnityEngine;
 using System;
-using csDronLink;
 
 public class VirtualDroneTelemetry : MonoBehaviour
 {

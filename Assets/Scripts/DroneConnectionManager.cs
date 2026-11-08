@@ -1,13 +1,13 @@
 using UnityEngine;
 using csDronLink;
 using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
-//using System.IO.Ports;
-//using System.Linq;
 
 public class DroneConnectionManager : MonoBehaviour
 {
     public static DroneConnectionManager Instance { get; private set; }
+
     public bool IsConnected { get; private set; } = false;
     public string LastError { get; private set; } = "";
     public ConnectionConfig.Mode Mode { get; private set; }
@@ -15,13 +15,14 @@ public class DroneConnectionManager : MonoBehaviour
 
     private Dron dron;
 
-    void Awake()
+    private void Awake()
     {
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
@@ -37,55 +38,29 @@ public class DroneConnectionManager : MonoBehaviour
         {
             if (mode == ConnectionConfig.Mode.Simulation)
             {
-                // Comprobar que el SITL es alcanzable
                 using (var tcp = new TcpClient())
                 {
                     tcp.Connect("127.0.0.1", 5763);
-                    tcp.Close();
                 }
             }
             else
             {
-                // En producción, solo guardamos el puerto COM y validamos su formato básico.
-                // La verificación real se hará en Connect() usando csDronLink, cuando se le de al botón PLAY.
-                // System.IO.Ports no está disponible en .NET Standard 2.1 de Unity por defecto.
-                // (MIRAR ESTO, prefiero que el botón conectar también verifique más aparte del formato,
-                //  tal vez es mejor tener solo un botón en vez de 2, CONNECT y PLAY)
-
                 if (string.IsNullOrEmpty(ComPort))
                 {
                     LastError = "Puerto COM vacío. Escribe algo tipo COM5.";
                     return false;
                 }
 
-                if (!ComPort.StartsWith("COM") || !int.TryParse(ComPort.Substring(3), out _))
+                if (!ComPort.StartsWith("COM") ||
+                    !int.TryParse(ComPort.Substring(3), out _))
                 {
                     LastError = "Invalid format. Use COM5, COM12...";
                     return false;
                 }
-
-                //string[] availablePorts = SerialPort.GetPortNames();
-                //if (!availablePorts.Contains(ComPort))
-                //{
-                //    LastError = $"El puerto {ComPort} no existe. Disponibles: {string.Join(", ", availablePorts)}";
-                //    return false;
-                //}
-
-                //// Verificar que el puerto no está ocupado (intento rápido de apertura)
-                //using (var testPort = new SerialPort(ComPort))
-                //{
-                //    testPort.Open();
-                //    testPort.Close();
-                //}
             }
 
             return true;
         }
-        //catch (UnauthorizedAccessException)
-        //{
-        //    LastError = $"El puerto {ComPort} está ocupado por otra aplicación.";
-        //    return false;
-        //}
         catch (Exception e)
         {
             LastError = e.Message;
@@ -93,7 +68,6 @@ public class DroneConnectionManager : MonoBehaviour
         }
     }
 
-    // Establece la conexión real y comienza la comunicación MAVLink. Llamar solo cuando se vaya a usar Play.
     public bool Connect()
     {
         Disconnect();
@@ -104,13 +78,9 @@ public class DroneConnectionManager : MonoBehaviour
             dron = new Dron();
 
             if (Mode == ConnectionConfig.Mode.Simulation)
-            {
-                dron.Conectar("simulacion",freq:20);
-            }
+                dron.Conectar("simulacion", freq: 20);
             else
-            {
-                dron.Conectar("produccion", ComPort,freq:20);
-            }
+                dron.Conectar("produccion", ComPort, freq: 20);
 
             IsConnected = true;
             return true;
@@ -126,13 +96,96 @@ public class DroneConnectionManager : MonoBehaviour
 
     public void Disconnect()
     {
+        StopTelemetry();
+        StopBatteryTelemetry();
+
         IsConnected = false;
         LastError = "";
         dron = null;
     }
 
-    public Dron GetDron()
+    private bool EnsureConnection()
     {
-        return dron;
+        if (IsConnected && dron != null)
+            return true;
+
+        Debug.LogWarning("No hay una conexión activa con el dron.");
+        return false;
+    }
+
+    // TELEMETRÍA
+
+    public void StartTelemetry(Action<byte, List<(string nombre, float valor)>> callback)
+    {
+        if (EnsureConnection())
+            dron.EnviarDatosTelemetria(callback);
+    }
+
+    public void StartBatteryTelemetry(Action<byte, List<(string nombre, float valor)>> callback)
+    {
+        if (EnsureConnection())
+            dron.EnviarDatosNivelBateria(callback);
+    }
+
+    public void StopTelemetry()
+    {
+        if (dron != null)
+            dron.DetenerDatosTelemetria();
+    }
+
+    public void StopBatteryTelemetry()
+    {
+        if (dron != null)
+            dron.DetenerDatosNivelBateria();
+    }
+
+    // CONTROL
+
+    public void SendRC(ushort roll, ushort pitch, ushort throttle, ushort yaw)
+    {
+        if (EnsureConnection())
+            dron.SendRC(roll, pitch, throttle, yaw);
+    }
+
+    public void TakeOff(
+        int altitude,
+        bool bloquear = true,
+        Action<byte, object> callback = null,
+        object param = null)
+    {
+        if (EnsureConnection())
+            dron.Despegar(altitude, bloquear, callback, param);
+    }
+
+    public void SetLoiterMode()
+    {
+        if (EnsureConnection())
+            dron.PonModoLoiter();
+    }
+
+    public void ReturnToLaunch(bool bloquear = true, Action<byte, object> callback = null, object param = null)
+    {
+        if (EnsureConnection())
+            dron.RTL(bloquear, callback, param);
+    }
+
+    public void SmartReturnToLaunch(bool bloquear = true, Action<byte, object> callback = null, object param = null)
+    {
+        if (EnsureConnection())
+            dron.SmartRTL(bloquear, callback, param);
+    }
+
+    public void Land(bool bloquear = true, Action<byte, object> callback = null, object param = null)
+    {
+        if (EnsureConnection())
+            dron.Aterrizar(bloquear, callback, param);
+    }
+
+    // ESCENARIO / GEOCERCAS
+
+    public void SetScenario(List<List<(double lat, double lon)>> scenario, Action callback = null)
+    {
+        if (EnsureConnection())
+            dron.EstableceEscenario(scenario, callback);
     }
 }

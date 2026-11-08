@@ -1,12 +1,9 @@
-using csDronLink;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class FenceGenerator : MonoBehaviour
 {
-    private Dron dron;
-
     [Header("Referencia a DroneTelemetry")]
     public DroneTelemetry droneTelemetry;
 
@@ -19,13 +16,12 @@ public class FenceGenerator : MonoBehaviour
     [Header("Parámetros")]
     public float margen = 0.1f;
 
-    void Start()
+    private void Start()
     {
-        //Esperamos un poco para que DroneTelemetry tenga tiempo de inicializarse y detectar el dron, si es que está presente desde el inicio.
         Invoke(nameof(IntentarGenerarEscenario), 3f);
     }
 
-    void IntentarGenerarEscenario()
+    private void IntentarGenerarEscenario()
     {
         if (droneTelemetry == null)
         {
@@ -33,42 +29,42 @@ public class FenceGenerator : MonoBehaviour
             return;
         }
 
-        dron = droneTelemetry.GetDron();
-
-        if (dron != null)
+        if (DroneConnectionManager.Instance == null ||
+            !DroneConnectionManager.Instance.IsConnected)
         {
-            Debug.Log("Dron detectado → generando escenario");
-
-            var scenario = ConstruirEscenario();
-
-            Debug.Log("Enviando escenario al dron...");
-
-            //new Thread(() =>
-            //{
-                Debug.Log("Entrando en EstableceEscenario...");
-                dron.EstableceEscenario(scenario);
-                Debug.Log("FENCES ENVIADOS AL DRON");
-            //}).Start();
+            Debug.LogWarning("No hay conexión activa con el dron. No se enviarán las geocercas.");
+            return;
         }
+
+        Debug.Log("Dron detectado → generando escenario");
+
+        var scenario = ConstruirEscenario();
+
+        Debug.Log("Enviando escenario al dron...");
+        Debug.Log("Entrando en EstableceEscenario...");
+
+        DroneConnectionManager.Instance.SetScenario(scenario);
+
+        Debug.Log("FENCES ENVIADOS AL DRON");
     }
 
-    List<List<(double lat, double lon)>> ConstruirEscenario()
+    private List<List<(double lat, double lon)>> ConstruirEscenario()
     {
         List<List<(double lat, double lon)>> scenario =
             new List<List<(double lat, double lon)>>();
 
         // INCLUSIÓN
         List<(double, double)> inclusion = new List<(double, double)>();
+
         foreach (var p in inclusionGPS)
-        {
             inclusion.Add((p.x, p.y));
-        }
+
         scenario.Add(inclusion);
 
         // PAREDES MANUALES
         List<List<Vector3>> paredes = new List<List<Vector3>>();
 
-        if (ConnectionConfig.SelectedScenario == ConnectionConfig.Scenario.Easy || 
+        if (ConnectionConfig.SelectedScenario == ConnectionConfig.Scenario.Easy ||
             ConnectionConfig.SelectedScenario == ConnectionConfig.Scenario.Hard ||
             ConnectionConfig.SelectedScenario == ConnectionConfig.Scenario.Custom)
         {
@@ -94,7 +90,7 @@ public class FenceGenerator : MonoBehaviour
 
             scenario.Add(fence);
         }
-        
+
         Debug.Log($"Escenario construido con {scenario.Count} fences");
 
         return scenario;
@@ -102,7 +98,9 @@ public class FenceGenerator : MonoBehaviour
 
     private List<List<Vector3>> GetScenarioParedes()
     {
-        var walls = Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+        var walls = Object.FindObjectsByType<Transform>(
+                FindObjectsInactive.Include,
+                FindObjectsSortMode.None)
             .Where(t => t.name.StartsWith("Wall_"))
             .Select(t => t.gameObject)
             .Distinct()
@@ -114,9 +112,7 @@ public class FenceGenerator : MonoBehaviour
         foreach (var wall in walls)
         {
             if (TryGetWallVertices(wall, out var vertices))
-            {
                 paredes.Add(vertices);
-            }
         }
 
         return paredes;
@@ -124,6 +120,7 @@ public class FenceGenerator : MonoBehaviour
         bool TryGetWallVertices(GameObject wall, out List<Vector3> vertices)
         {
             var transforms = wall.GetComponentsInChildren<Transform>();
+
             Transform v_bl = transforms.FirstOrDefault(t => t.CompareTag("VertexBottomLeft"));
             Transform v_br = transforms.FirstOrDefault(t => t.CompareTag("VertexBottomRight"));
             Transform v_tl = transforms.FirstOrDefault(t => t.CompareTag("VertexTopLeft"));
@@ -138,6 +135,7 @@ public class FenceGenerator : MonoBehaviour
                     V(v_tr.position.x, v_tr.position.z),
                     V(v_tl.position.x, v_tl.position.z)
                 };
+
                 return true;
             }
 
@@ -148,25 +146,25 @@ public class FenceGenerator : MonoBehaviour
         int GetWallIndex(string name)
         {
             const string prefix = "Wall_";
-            if (name.StartsWith(prefix) && int.TryParse(name.Substring(prefix.Length), out var index))
-            {
+
+            if (name.StartsWith(prefix) &&
+                int.TryParse(name.Substring(prefix.Length), out var index))
                 return index;
-            }
 
             return int.MaxValue;
         }
     }
 
-
     // Expande el rectángulo hacia fuera (margen de seguridad)
-    List<Vector3> ExpandirRectangulo(List<Vector3> puntos, float margen)
+    private List<Vector3> ExpandirRectangulo(List<Vector3> puntos, float margen)
     {
-        // Centro
         Vector3 centro = Vector3.zero;
-        foreach (var p in puntos) centro += p;
+
+        foreach (var p in puntos)
+            centro += p;
+
         centro /= puntos.Count;
 
-        // Ejes del rectángulo (direcciones principales)
         Vector3 dir1 = (puntos[1] - puntos[0]).normalized;
         Vector3 dir2 = (puntos[3] - puntos[0]).normalized;
 
@@ -175,8 +173,6 @@ public class FenceGenerator : MonoBehaviour
         foreach (var p in puntos)
         {
             Vector3 offset = Vector3.zero;
-
-            // decidir hacia qué lado expandir en cada eje
             Vector3 local = p - centro;
 
             float sign1 = Mathf.Sign(Vector3.Dot(local, dir1));
@@ -191,10 +187,10 @@ public class FenceGenerator : MonoBehaviour
         return resultado;
     }
 
-    Vector3 V(float x, float z) => new Vector3(x, 0, z);
+    private Vector3 V(float x, float z) => new Vector3(x, 0, z);
 
     // Dibuja el polígono de inclusión y las paredes en la pestaña Scene del editor de Unity
-    void OnDrawGizmos() 
+    private void OnDrawGizmos()
     {
         if (worldAnchor == null) return;
 
@@ -220,8 +216,10 @@ public class FenceGenerator : MonoBehaviour
 
         // PAREDES
         Gizmos.color = Color.red;
+
         List<List<Vector3>> paredes = new List<List<Vector3>>();
-        if (ConnectionConfig.SelectedScenario == ConnectionConfig.Scenario.Easy || 
+
+        if (ConnectionConfig.SelectedScenario == ConnectionConfig.Scenario.Easy ||
             ConnectionConfig.SelectedScenario == ConnectionConfig.Scenario.Hard ||
             ConnectionConfig.SelectedScenario == ConnectionConfig.Scenario.Custom)
         {

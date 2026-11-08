@@ -1,14 +1,8 @@
-using csDronLink;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class DroneTelemetry : MonoBehaviour
 {
-    private Dron miDron;
-
     [Header("Arrastra aquí el DroneRig que tiene VirtualDroneTelemetry")]
     public VirtualDroneTelemetry virtualDron;
 
@@ -17,15 +11,13 @@ public class DroneTelemetry : MonoBehaviour
     private void ProcesarTelemetria(byte source, List<(string nombre, float valor)> telemetria)
     {
         if (!isActive) return;
+
         if (virtualDron == null)
         {
             Debug.LogError("VirtualDroneTelemetry no asignado en el inspector. No se puede procesar la telemetría.");
             return;
         }
 
-        // Debug.Log($"Telemetría recibida de {source}: " + string.Join(", ", telemetria.ConvertAll(t => $"{t.nombre}={t.valor}")));
-
-        //si algún dato no existe, Find devuelve default y .valor podría ser 0
         float latitudRaw = telemetria.Find(t => t.nombre == "Lat").valor;
         float longitudRaw = telemetria.Find(t => t.nombre == "Lon").valor;
         float altitud = telemetria.Find(t => t.nombre == "Alt").valor;
@@ -67,77 +59,63 @@ public class DroneTelemetry : MonoBehaviour
         else modeName = "UNKNOWN";
 
         float armStatus = telemetria.Find(t => t.nombre == "Armed").valor;
-
         float roll = telemetria.Find(t => t.nombre == "RollDeg").valor;
         float pitch = telemetria.Find(t => t.nombre == "PitchDeg").valor;
 
-        virtualDron.SetTelemetry((double)latitud, (double)longitud, (double)altitud, (float) heading, (string) modeName, (float)armStatus,(float) pitch, (float) roll);
-      
+        virtualDron.SetTelemetry(
+            latitud, longitud, altitud, (float)heading,
+            modeName, armStatus, pitch, roll);
     }
 
     private void ProcesarTelemetriaBateria(byte source, List<(string nombre, float valor)> telemetria)
     {
         if (!isActive) return;
+
         if (virtualDron == null)
         {
             Debug.LogError("VirtualDroneTelemetry no asignado en el inspector. No se puede procesar la telemetría de batería.");
             return;
         }
 
-        //Debug.Log($"Telemetría de batería recibida de {source}: " + string.Join(", ", telemetria.ConvertAll(t => $"{t.nombre}={t.valor}")));
-
         float battCurrent_A = telemetria.Find(t => t.nombre == "current").valor;
         float battVoltage_V = telemetria.Find(t => t.nombre == "voltage").valor;
-        float battRemaining_pct = telemetria.Find(t => t.nombre == "remaining").valor; 
+        float battRemaining_pct = telemetria.Find(t => t.nombre == "remaining").valor;
 
-        virtualDron.SetTelemetryBattery((float) battCurrent_A, (float)battVoltage_V, (float)battRemaining_pct);
+        virtualDron.SetTelemetryBattery(
+            battCurrent_A, battVoltage_V, battRemaining_pct);
     }
 
-
-    void Start()
+    private void Start()
     {
         if (virtualDron == null)
             virtualDron = FindFirstObjectByType<VirtualDroneTelemetry>();
 
-        if (DroneConnectionManager.Instance == null || !DroneConnectionManager.Instance.IsConnected)
+        if (DroneConnectionManager.Instance == null ||
+            !DroneConnectionManager.Instance.IsConnected)
         {
             Debug.LogError("DroneTelemetry: No hay conexión activa. Vuelve al menú y pulsa CONNECT.");
             return;
         }
 
-        miDron = DroneConnectionManager.Instance.GetDron();
-
-        if (miDron == null)
-        {
-            Debug.LogError("DroneTelemetry: conexión marcada como activa pero Dron es null.");
-            return;
-        }
-
-        miDron.EnviarDatosTelemetria(ProcesarTelemetria);
-        miDron.EnviarDatosNivelBateria(ProcesarTelemetriaBateria);
-    }
-
-    public Dron GetDron()
-    {
-        return miDron;
+        DroneConnectionManager.Instance.StartTelemetry(ProcesarTelemetria);
+        DroneConnectionManager.Instance.StartBatteryTelemetry(ProcesarTelemetriaBateria);
     }
 
     private void OnDestroy()
     {
-        if (miDron != null)
+        if (DroneConnectionManager.Instance != null)
         {
-            miDron.DetenerDatosTelemetria();
-            miDron.DetenerDatosNivelBateria();
+            DroneConnectionManager.Instance.StopTelemetry();
+            DroneConnectionManager.Instance.StopBatteryTelemetry();
         }
     }
 
     private void OnApplicationQuit()
     {
-        if (miDron != null)
+        if (DroneConnectionManager.Instance != null)
         {
-            miDron.DetenerDatosTelemetria();
-            miDron.DetenerDatosNivelBateria();
+            DroneConnectionManager.Instance.StopTelemetry();
+            DroneConnectionManager.Instance.StopBatteryTelemetry();
         }
     }
-
 }
