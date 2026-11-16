@@ -80,10 +80,10 @@
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\Internal\DisjointSet.cs" />
     <Compile Include="Assets\Scripts\Scenario\Persistence\ScenarioPersistence.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Examples\Scripts\CameraController.cs" />
-    <Compile Include="Assets\Scripts\Scenario\ResultsDisplay.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\Internal\CustomComparator.cs" />
     <Compile Include="Assets\Scripts\Core\SceneManagement.cs" />
     <Compile Include="Assets\Scripts\Gameplay\DroneCollision.cs" />
+    <Compile Include="Assets\Scripts\Results\ResultsDisplay.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\Internal\CDT\CDT_Public.cs" />
     <Compile Include="Assets\Scripts\Gameplay\RaceTimer.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\Internal\CV\CV_Test.cs" />
