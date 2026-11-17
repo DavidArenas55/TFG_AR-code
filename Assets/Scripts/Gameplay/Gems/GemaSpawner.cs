@@ -191,7 +191,23 @@ public class GemaSpawner : MonoBehaviour
                 // B) MODO POSICIÓN FIJA (Coordenadas)
                 else
                 {
-                    Vector3 pos = worldAnchor.GPSToUnity(obj.latitude, obj.longitude) + new Vector3(0, (float)obj.altitude, 0);
+                    Vector3 pos;
+
+                    if (ConnectionConfig.CustomCoordinateSystem ==
+                        ConnectionConfig.CoordinateSystem.GPS)
+                    {
+                        pos = worldAnchor.GPSToUnity(
+                            obj.latitude, obj.longitude) +
+                            new Vector3(0, (float)obj.altitude, 0);
+                    }
+                    else
+                    {
+                        pos = new Vector3(
+                            obj.localX,
+                            obj.localY,
+                            obj.localZ);
+                    }
+
                     Vector3 gemPos = pos + new Vector3(0, -1f, 0);
                     Quaternion rot = Quaternion.Euler(0, (float)obj.heading - 18f, 0);
 

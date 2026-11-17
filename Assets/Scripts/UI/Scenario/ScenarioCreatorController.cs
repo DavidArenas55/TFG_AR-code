@@ -30,11 +30,20 @@ public class ScenarioCreatorController : MonoBehaviour
     public Toggle gem7Toggle;
     public Toggle gem8Toggle;
 
+    [Header("Coordinate System")]
+    public Toggle gpsToggle;
+    public Toggle localToggle;
+
     [Header("Position")]
     public InputField latitudeInputField;
     public InputField longitudeInputField;
     public InputField altitudeInputField;
     public InputField headingInputField;
+
+    [Header("Position Labels")]
+    public Text latitudeLabel;
+    public Text longitudeLabel;
+    public Text altitudeLabel;
 
     [Header("Object Properties")]
     public InputField diameterInputField;
@@ -125,6 +134,26 @@ public class ScenarioCreatorController : MonoBehaviour
         removeGameObjectButton.onClick.AddListener(OnRemoveGameObjectClicked);
         saveScenarioButton.onClick.AddListener(OnSaveClicked);
 
+        bool isLocal = ConnectionConfig.CustomCoordinateSystem ==
+            ConnectionConfig.CoordinateSystem.Local;
+
+        gpsToggle.SetIsOnWithoutNotify(!isLocal);
+        localToggle.SetIsOnWithoutNotify(isLocal);
+
+        gpsToggle.onValueChanged.AddListener(isOn =>
+        {
+            if (isOn)
+                SetCoordinateSystem(ConnectionConfig.CoordinateSystem.GPS);
+        });
+
+        localToggle.onValueChanged.AddListener(isOn =>
+        {
+            if (isOn)
+                SetCoordinateSystem(ConnectionConfig.CoordinateSystem.Local);
+        });
+
+        UpdateCoordinateLabels();
+
         if (mapPositionSelector != null)
             mapPositionSelector.PositionSelected += OnPositionSelected;
 
@@ -143,13 +172,19 @@ public class ScenarioCreatorController : MonoBehaviour
     }
     void AddGameObjectToList(int id, string type, double latitude, double longitude, double altitude, double heading, float? diameter, int? width, int? height, string rotation, bool? scoreTarget, bool? circuitTarget, bool? endGameObject, bool? gemsRandomPosition, int? numberOfGems, bool? stopwatchObject, string destructionMethod)
     {
+        bool isLocal = ConnectionConfig.CustomCoordinateSystem ==
+            ConnectionConfig.CoordinateSystem.Local;
+
         ScenarioObjectData newObject = new ScenarioObjectData
         {
             id = id,
             type = type,
-            latitude = latitude,
-            longitude = longitude,
-            altitude = altitude,
+            latitude = isLocal ? 0 : latitude,
+            longitude = isLocal ? 0 : longitude,
+            altitude = isLocal ? 0 : altitude,
+            localX = isLocal ? (float)latitude : 0f,
+            localY = isLocal ? (float)altitude : 0f,
+            localZ = isLocal ? (float)longitude : 0f,
             heading = heading,
             diameter = diameter,
             width = width,
@@ -242,6 +277,8 @@ public class ScenarioCreatorController : MonoBehaviour
         if (!HasValidCoordinates()) return;
         // Campos obligatorios / comunes
         double lat = 0, lon = 0, alt = 0, heading = 0;
+        bool isLocal = ConnectionConfig.CustomCoordinateSystem ==
+            ConnectionConfig.CoordinateSystem.Local;
 
         if (latitudeInputField.interactable)
         {
@@ -250,7 +287,7 @@ public class ScenarioCreatorController : MonoBehaviour
                 if (debugText2 != null) { debugText2.text = "Error: 'Latitude' contains letters o characters that are not valid."; debugText2.color = Color.red; }
                 return;
             }
-            if (lat < -90 || lat > 90)
+            if (!isLocal && (lat < -90 || lat > 90))
             {
                 if (debugText2 != null) { debugText2.text = "Error: 'Latitude' must be a value between -90 and 90."; debugText2.color = Color.red; }
                 return;
@@ -264,7 +301,7 @@ public class ScenarioCreatorController : MonoBehaviour
                 if (debugText2 != null) { debugText2.text = "Error: 'Longitude' contains letters o characters that are not valid."; debugText2.color = Color.red; }
                 return;
             }
-            if (lon < -180 || lon > 180)
+            if (!isLocal && (lon < -180 || lon > 180))
             {
                 if (debugText2 != null) { debugText2.text = "Error: 'Longitude' must be a value between -180 and 180."; debugText2.color = Color.red; }
                 return;
@@ -587,7 +624,8 @@ public class ScenarioCreatorController : MonoBehaviour
             ConnectionConfig.CustomScenarioObjects,
             ConnectionConfig.CustomHasStopwatch,
             ConnectionConfig.CustomHasCountdown,
-            ConnectionConfig.CustomCountdownTime
+            ConnectionConfig.CustomCountdownTime,
+            ConnectionConfig.CustomCoordinateSystem
         );
 
         if (saved)
@@ -822,5 +860,30 @@ public class ScenarioCreatorController : MonoBehaviour
     {
         latitudeInputField.text = latitude.ToString("F8");
         longitudeInputField.text = longitude.ToString("F8");
+    }
+    void UpdateCoordinateLabels()
+    {
+        bool isLocal = ConnectionConfig.CustomCoordinateSystem ==
+            ConnectionConfig.CoordinateSystem.Local;
+
+        latitudeLabel.text = isLocal ? "X (m):" : "Latitude:";
+        longitudeLabel.text = isLocal ? "Z (m):" : "Longitude:";
+        altitudeLabel.text = isLocal ? "Y (m):" : "Altitude (m):";
+    }
+    void SetCoordinateSystem(ConnectionConfig.CoordinateSystem system)
+    {
+        ConnectionConfig.CustomCoordinateSystem = system;
+
+        gpsToggle.SetIsOnWithoutNotify(
+            system == ConnectionConfig.CoordinateSystem.GPS);
+
+        localToggle.SetIsOnWithoutNotify(
+            system == ConnectionConfig.CoordinateSystem.Local);
+
+        UpdateCoordinateLabels();
+
+        latitudeInputField.text = "";
+        longitudeInputField.text = "";
+        altitudeInputField.text = "";
     }
 }

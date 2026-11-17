@@ -23,9 +23,22 @@ public static class CustomScenario
 
         foreach (var obj in objects)
         {
-            Vector3 position = worldAnchor.GPSToUnity(
-                obj.latitude, obj.longitude) +
-                new Vector3(0, (float)obj.altitude, 0);
+            Vector3 position;
+
+            if (ConnectionConfig.CustomCoordinateSystem ==
+                ConnectionConfig.CoordinateSystem.GPS)
+            {
+                position = worldAnchor.GPSToUnity(
+                    obj.latitude, obj.longitude) +
+                    new Vector3(0, (float)obj.altitude, 0);
+            }
+            else
+            {
+                position = new Vector3(
+                    obj.localX,
+                    obj.localY,
+                    obj.localZ);
+            }
 
             Quaternion rotation = Quaternion.Euler(
                 90, (float)obj.heading, 0);
