@@ -133,14 +133,13 @@ public class MenuController : MonoBehaviour
     }
     void OnCreateScenarioClicked()
     {
-        droneFlowToggle.isOn = false; circuitToggle.isOn = false; easyToggle.isOn = false; hardToggle.isOn = false; searchToggle.isOn = false;
-        ConnectionConfig.SelectedScenario = ConnectionConfig.Scenario.None;
-        ValidatePlay();
         scenarioCreatorWindowController.Open();
     }
     private void OnScenarioCreatorClosed()
     {
         savedScenariosController.ClearSelection();
+        UpdateSelectedCustomScenarioText();
+        ValidatePlay();
     }
     void onSavedScenariosClicked()
     {

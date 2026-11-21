@@ -244,6 +244,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScenarioCreatorWindowController
   createScenarioWindow: {fileID: 1178006210}
   backButton: {fileID: 1768766435}
+  scenarioCreatorController: {fileID: 146293077}
 --- !u!4 &13243966
 Transform:
   m_ObjectHideFlags: 0
@@ -12100,7 +12101,7 @@ RectTransform:
   m_Father: {fileID: 53593079}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -14453,7 +14454,7 @@ RectTransform:
   m_Father: {fileID: 584633196}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -16177,7 +16178,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1178006211
 RectTransform:
   m_ObjectHideFlags: 0
@@ -16246,6 +16247,9 @@ RectTransform:
   - {fileID: 726159143}
   - {fileID: 1955772293}
   - {fileID: 1185954181}
+  - {fileID: 475524915}
+  - {fileID: 1620040201}
+  - {fileID: 1672252565}
   - {fileID: 25244486}
   - {fileID: 480190884}
   - {fileID: 2085914550}
@@ -16254,9 +16258,6 @@ RectTransform:
   - {fileID: 1768766432}
   - {fileID: 1912290236}
   - {fileID: 30628050}
-  - {fileID: 475524915}
-  - {fileID: 1620040201}
-  - {fileID: 1672252565}
   m_Father: {fileID: 449338940}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}

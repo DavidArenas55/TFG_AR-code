@@ -143,13 +143,25 @@ public class ScenarioCreatorController : MonoBehaviour
         gpsToggle.onValueChanged.AddListener(isOn =>
         {
             if (isOn)
+            {
                 SetCoordinateSystem(ConnectionConfig.CoordinateSystem.GPS);
+            }
+            else if (!localToggle.isOn)
+            {
+                gpsToggle.SetIsOnWithoutNotify(true);
+            }
         });
 
         localToggle.onValueChanged.AddListener(isOn =>
         {
             if (isOn)
+            {
                 SetCoordinateSystem(ConnectionConfig.CoordinateSystem.Local);
+            }
+            else if (!gpsToggle.isOn)
+            {
+                localToggle.SetIsOnWithoutNotify(true);
+            }
         });
 
         UpdateCoordinateLabels();
@@ -478,8 +490,23 @@ public class ScenarioCreatorController : MonoBehaviour
 
             if (obj.gemsRandomPosition != true)
             {
-                infoParts.Add($"Pos: ({obj.latitude}, {obj.longitude}, {obj.altitude}m)");
-                if (obj.heading != 0) infoParts.Add($"Head: {obj.heading}º");
+                if (ConnectionConfig.CustomCoordinateSystem ==
+                    ConnectionConfig.CoordinateSystem.Local)
+                {
+                    infoParts.Add($"Pos: ({obj.localX}, {obj.localY}, {obj.localZ})m");
+                }
+                else
+                {
+                    infoParts.Add($"GPS: ({obj.latitude}, {obj.longitude}, {obj.altitude}m)");
+                }
+
+                if (obj.heading != 0)
+                    infoParts.Add($"Head: {obj.heading}º");
+            }
+
+            if (obj.diameter.HasValue)
+            {
+                infoParts.Add($"Diameter: {obj.diameter.Value}m");
             }
 
             if (obj.rotation != null && obj.rotation != "None") infoParts.Add($"Rot: {obj.rotation}");
@@ -582,62 +609,73 @@ public class ScenarioCreatorController : MonoBehaviour
             return;
         }
 
-        ConnectionConfig.CustomScenarioName = scenarioName;
-        ConnectionConfig.SelectedScenario = ConnectionConfig.Scenario.Custom;
+        // Calcular las reglas del nuevo escenario sin modificar
+        // todavía la configuración del escenario seleccionado.
+        bool hasStopwatch = false;
 
-        ConnectionConfig.CustomHasStopwatch = false;
         foreach (var obj in ConnectionConfig.CustomScenarioObjects)
         {
             if (obj.stopwatchObject == true)
-                ConnectionConfig.CustomHasStopwatch = true;
+            {
+                hasStopwatch = true;
+                break;
+            }
         }
 
-        ConnectionConfig.CustomHasCountdown = countdownToggle.isOn;
+        bool hasCountdown = countdownToggle.isOn;
+        float countdownTime = 0f;
 
-        if (countdownToggle.isOn)
+        if (hasCountdown)
         {
             if (float.TryParse(timeLimitInputField.text, out float t) && t > 0)
             {
-                ConnectionConfig.CustomCountdownTime = t * 60f; // Pasar de minutos a segundos
-                if (debugText2 != null) debugText2.text = ""; // Limpiar advertencias viejas
+                countdownTime = t * 60f;
             }
             else
             {
-                // Si estaba encendido pero el texto era inválido ("abc") o vacío
+                countdownTime = 360f;
+
                 if (debugText2 != null)
                 {
-                    debugText2.text = "Countdown time not valid. The default value of 6 minutes will be used.";
+                    debugText2.text =
+                        "Countdown time not valid. The default value of 6 minutes will be used.";
                     debugText2.color = Color.yellow;
                 }
-                ConnectionConfig.CustomCountdownTime = 360f;
             }
         }
-        else
-        {
-            // Si el countdown NOT estaba encendido, no mostramos nada y dejamos el tiempo en 0.
-            ConnectionConfig.CustomCountdownTime = 0f;
-        }
 
-        // Guardar el escenario
+        // Primero intentar guardar el escenario.
         bool saved = ScenarioPersistence.SaveScenario(
             scenarioName,
             ConnectionConfig.CustomScenarioObjects,
-            ConnectionConfig.CustomHasStopwatch,
-            ConnectionConfig.CustomHasCountdown,
-            ConnectionConfig.CustomCountdownTime,
+            hasStopwatch,
+            hasCountdown,
+            countdownTime,
             ConnectionConfig.CustomCoordinateSystem
         );
 
-        if (saved)
+        if (!saved)
         {
-            scenarioCreatorWindowController.Close();
-            ScenarioSaved?.Invoke();
-        }
-        else
-        {
-            debugText2.text = "Ya existe un escenario con ese nombre.";
+            if (debugText2 != null)
+            {
+                debugText2.text = "Error: A scenario with this name already exists.";
+                debugText2.color = Color.red;
+            }
             return;
         }
+
+        // Solo después de guardar correctamente,
+        // establecer el nuevo escenario como seleccionado.
+        ConnectionConfig.CustomScenarioName = scenarioName;
+        ConnectionConfig.SelectedScenario = ConnectionConfig.Scenario.Custom;
+        ConnectionConfig.CustomHasStopwatch = hasStopwatch;
+        ConnectionConfig.CustomHasCountdown = hasCountdown;
+        ConnectionConfig.CustomCountdownTime = countdownTime;
+
+        // Confirmar la creación sin recuperar el escenario anterior.
+        scenarioCreatorWindowController.ConfirmSaved();
+
+        ScenarioSaved?.Invoke();
     }
     void DeselectAllExcluding(string groupType, Toggle activeToggle)
     {
@@ -869,9 +907,37 @@ public class ScenarioCreatorController : MonoBehaviour
         latitudeLabel.text = isLocal ? "X (m):" : "Latitude:";
         longitudeLabel.text = isLocal ? "Z (m):" : "Longitude:";
         altitudeLabel.text = isLocal ? "Y (m):" : "Altitude (m):";
+
+        // El mapa del DroneLab solo admite coordenadas GPS.
+        if (mapPositionSelector != null &&
+            mapPositionSelector.placeOnMapButton != null)
+        {
+            mapPositionSelector.placeOnMapButton.interactable = !isLocal;
+        }
     }
     void SetCoordinateSystem(ConnectionConfig.CoordinateSystem system)
     {
+        // No permitir cambiar de sistema si ya existen objetos.
+        if (ConnectionConfig.CustomScenarioObjects.Count > 0)
+        {
+            gpsToggle.SetIsOnWithoutNotify(
+                ConnectionConfig.CustomCoordinateSystem ==
+                ConnectionConfig.CoordinateSystem.GPS);
+
+            localToggle.SetIsOnWithoutNotify(
+                ConnectionConfig.CustomCoordinateSystem ==
+                ConnectionConfig.CoordinateSystem.Local);
+
+            if (debugText2 != null)
+            {
+                debugText2.text =
+                    "You cannot change the coordinate system after adding objects.";
+                debugText2.color = Color.red;
+            }
+
+            return;
+        }
+
         ConnectionConfig.CustomCoordinateSystem = system;
 
         gpsToggle.SetIsOnWithoutNotify(
@@ -885,5 +951,36 @@ public class ScenarioCreatorController : MonoBehaviour
         latitudeInputField.text = "";
         longitudeInputField.text = "";
         altitudeInputField.text = "";
+
+        if (debugText2 != null)
+            debugText2.text = "";
+    }
+    public void ResetCreator()
+    {
+        // Limpiar el formulario.
+        scenarioNameInputField.text = "";
+
+        latitudeInputField.text = "";
+        longitudeInputField.text = "";
+        altitudeInputField.text = "";
+        headingInputField.text = "";
+
+        diameterInputField.text = "";
+        widthInputField.text = "";
+        heightInputField.text = "";
+        numberOfGemsInputField.text = "";
+        timeLimitInputField.text = "";
+
+        if (debugText2 != null)
+            debugText2.text = "";
+
+        // Restablecer los controles.
+        InitInputsState();
+        RefreshListUI();
+
+        // Mostrar GPS, que es el sistema inicial de un escenario nuevo.
+        gpsToggle.SetIsOnWithoutNotify(true);
+        localToggle.SetIsOnWithoutNotify(false);
+        UpdateCoordinateLabels();
     }
 }
