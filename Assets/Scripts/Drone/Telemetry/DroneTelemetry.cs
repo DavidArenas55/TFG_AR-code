@@ -6,8 +6,9 @@ public class DroneTelemetry : MonoBehaviour
     [Header("Arrastra aquí el DroneRig que tiene VirtualDroneTelemetry")]
     public VirtualDroneTelemetry virtualDron;
 
+    [Header("World Anchor")]
+    public WorldAnchor worldAnchor;
     private bool isActive = true;
-
     private void ProcesarTelemetria(byte source, List<(string nombre, float valor)> telemetria)
     {
         if (!isActive) return;
@@ -62,11 +63,28 @@ public class DroneTelemetry : MonoBehaviour
         float roll = telemetria.Find(t => t.nombre == "RollDeg").valor;
         float pitch = telemetria.Find(t => t.nombre == "PitchDeg").valor;
 
-        virtualDron.SetTelemetry(
-            latitud, longitud, altitud, (float)heading,
-            modeName, armStatus, pitch, roll);
-    }
+        if (worldAnchor == null)
+        {
+            Debug.LogError("DroneTelemetry: WorldAnchor no asignado.");
+            return;
+        }
 
+        // Convertir GPS a coordenadas Unity.
+        Vector3 unityPosition = worldAnchor.GPSToUnity(latitud, longitud);
+        unityPosition.y = altitud + virtualDron.offsetVisual;
+
+        // Mantener la orientación actual del dron GPS.
+        Quaternion rotation = Quaternion.Euler(
+            -pitch, (float)heading, -roll);
+
+        virtualDron.SetUnityTelemetry(
+            unityPosition,
+            rotation,
+            modeName,
+            armStatus,
+            pitch,
+            roll);
+    }
     private void ProcesarTelemetriaBateria(byte source, List<(string nombre, float valor)> telemetria)
     {
         if (!isActive) return;
@@ -84,11 +102,17 @@ public class DroneTelemetry : MonoBehaviour
         virtualDron.SetTelemetryBattery(
             battCurrent_A, battVoltage_V, battRemaining_pct);
     }
-
     private void Start()
     {
+        // La telemetría MAVLink solo corresponde al dron GPS.
+        if (ConnectionConfig.SelectedDrone != ConnectionConfig.DroneType.GPS)
+            return;
+
         if (virtualDron == null)
             virtualDron = FindFirstObjectByType<VirtualDroneTelemetry>();
+
+        if (worldAnchor == null && virtualDron != null)
+            worldAnchor = virtualDron.worldAnchor;
 
         if (DroneConnectionManager.Instance == null ||
             !DroneConnectionManager.Instance.IsConnected)
@@ -100,7 +124,6 @@ public class DroneTelemetry : MonoBehaviour
         DroneConnectionManager.Instance.StartTelemetry(ProcesarTelemetria);
         DroneConnectionManager.Instance.StartBatteryTelemetry(ProcesarTelemetriaBateria);
     }
-
     private void OnDestroy()
     {
         if (DroneConnectionManager.Instance != null)
@@ -109,7 +132,6 @@ public class DroneTelemetry : MonoBehaviour
             DroneConnectionManager.Instance.StopBatteryTelemetry();
         }
     }
-
     private void OnApplicationQuit()
     {
         if (DroneConnectionManager.Instance != null)

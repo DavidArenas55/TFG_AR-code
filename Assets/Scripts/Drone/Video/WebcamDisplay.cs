@@ -22,9 +22,11 @@ public class WebCamDisplay : MonoBehaviour
         public float k1, k2, k3, p1, p2;  // Coeficientes de distorsión radial (k) y tangencial (p)
         public int width, height;  // Resolución de la imagen usada en la calibración
     }
-
     void Start()
     {
+        if (ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.Tello)
+            return;
+
         if (!rawImage)
         {
             Debug.LogError("WebCamDisplay: rawImage no asignado.");

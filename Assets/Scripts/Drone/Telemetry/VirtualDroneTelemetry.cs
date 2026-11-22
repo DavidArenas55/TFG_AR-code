@@ -39,13 +39,13 @@ public class VirtualDroneTelemetry : MonoBehaviour
     [SerializeField] private float batteryVoltage_V;
     [SerializeField] private float batteryRemaining_pct;
 
-
     void Start()
     {
         targetPosition = transform.position;
         targetRotation = transform.rotation;
 
-        if (!worldAnchor)
+        if (ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.GPS
+            && !worldAnchor)
         {
             Debug.LogError("VirtualDroneTelemetry: WorldAnchor no asignado.");
         }
@@ -63,46 +63,46 @@ public class VirtualDroneTelemetry : MonoBehaviour
             transform.SetPositionAndRotation(targetPosition, targetRotation);
         }
 
-        UpdateCurrentGPS();
-    }
-
-
-    public void SetTelemetry(double latitude, double longitude, double altitude, float headingDegrees, string modeName, float armStatus, float pitch, float roll)
-    {
-        if (!worldAnchor)
+        if (ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.GPS)
         {
-            Debug.LogError("VirtualDroneTelemetry: WorldAnchor no asignado.");
-            return;
+            UpdateCurrentGPS();
         }
+    }
+    public void SetUnityPose(Vector3 position, Quaternion rotation)
+    {
+        targetPosition = position;
+        targetRotation = rotation;
+    }
+    // Actualiza la representación y el estado del dron a partir de datos Unity.
+    // No realiza conversiones GPS.
+    public void SetUnityTelemetry(
+        Vector3 position,
+        Quaternion rotation,
+        string modeName,
+        float armStatus,
+        float pitch,
+        float roll)
+    {
+        SetUnityPose(position, rotation);
 
-        Vector3 unityPosition = worldAnchor.GPSToUnity(latitude, longitude);
-
-        unityPosition.y = (float)altitude + offsetVisual;
-
-        //Como la anchor Corner (anchorUnityPoint) siempre estará en (0,-1,0) el dron se moverá relativo a esa posición, por lo que no necesitamos aplicar ningún offset adicional a la posición (en Y ya se aplicó el offset). Solo convertimos el lat/lon a Unity y lo asignamos directamente.
-        targetPosition = unityPosition; 
-        targetRotation = Quaternion.Euler(-pitch, headingDegrees, -roll);
-
-        // Redondeamos a 2 decimales para evitar mostrar números con muchas cifras en el Inspector de Unity.
+        // Redondeamos a 2 decimales para mostrar los valores en el Inspector.
         currentPitch = Mathf.Round(pitch * 100f) / 100f;
         currentRoll = Mathf.Round(roll * 100f) / 100f;
 
-        this.flightMode = modeName;
-        
+        flightMode = modeName;
+
+        // Estado de armado del dron.
         if (armStatus == 1f)
             this.armStatus = "ARMED";
         else
             this.armStatus = "DISARMED";
     }
-
     public void SetTelemetryBattery(float battCurrent_A, float battVoltage_V, float battRemaining_pct)
     {
         this.batteryCurrent_A = battCurrent_A;
         this.batteryVoltage_V = battVoltage_V;
         this.batteryRemaining_pct = battRemaining_pct;
     }
-
-
     private void UpdateCurrentGPS()
     {
         if (!worldAnchor) return;
@@ -124,12 +124,10 @@ public class VirtualDroneTelemetry : MonoBehaviour
         float heading = unityYaw;
         currentHeading = Mathf.Round(heading * 100f) / 100f; // Redondeamos a 2 decimales.
     }
-
     public (double latitude, double longitude, double altitude, float heading) GetCurrentGPS()
     {
         return (currentLatitude, currentLongitude, currentAltitude, currentHeading);
     }
-
     public float GetBatteryCurrent_A() => batteryCurrent_A;
     public float GetBatteryVoltage_V() => batteryVoltage_V;
     public float GetBatteryRemaining_pct() => batteryRemaining_pct;

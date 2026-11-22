@@ -18,11 +18,17 @@ public class FenceGenerator : MonoBehaviour
 
     private void Start()
     {
+        if (ConnectionConfig.SelectedDrone != ConnectionConfig.DroneType.GPS)
+            return;
+
         Invoke(nameof(IntentarGenerarEscenario), 3f);
     }
 
     private void IntentarGenerarEscenario()
     {
+        if (ConnectionConfig.SelectedDrone != ConnectionConfig.DroneType.GPS)
+            return;
+
         if (droneTelemetry == null)
         {
             Debug.LogWarning("DroneTelemetry no asignado");
@@ -192,6 +198,9 @@ public class FenceGenerator : MonoBehaviour
     // Dibuja el polígono de inclusión y las paredes en la pestaña Scene del editor de Unity
     private void OnDrawGizmos()
     {
+        if (ConnectionConfig.SelectedDrone != ConnectionConfig.DroneType.GPS)
+            return;
+
         if (worldAnchor == null) return;
 
         // INCLUSIÓN

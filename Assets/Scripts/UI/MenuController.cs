@@ -10,8 +10,11 @@ public class MenuController : MonoBehaviour
     private bool isUpdatingToggles = false;
 
     [Header("UI")]
-    public Toggle simulationToggle; public Toggle productionToggle; public InputField comInputField; public Text debugText;
-
+    public Toggle simulationToggle; 
+    public Toggle productionToggle;
+    public Toggle telloToggle;
+    public InputField comInputField; 
+    public Text debugText;
     public Button connectButton; public Button playButton;
 
     [Header("Scenario Creator")]
@@ -43,7 +46,6 @@ public class MenuController : MonoBehaviour
     public SavedScenariosController savedScenariosController;
 
     [Header("Place on Map")]
-
     public int id = 0;
 
     [Header("Scenarios")]
@@ -59,19 +61,27 @@ public class MenuController : MonoBehaviour
 
     void Start()
     {
-        if (ConnectionConfig.SelectedMode == ConnectionConfig.Mode.Production)
+        if (ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.Tello)
         {
-            productionToggle.isOn = true;
-            simulationToggle.isOn = false;
+            telloToggle.SetIsOnWithoutNotify(true);
+            simulationToggle.SetIsOnWithoutNotify(false);
+            productionToggle.SetIsOnWithoutNotify(false);
         }
         else
         {
-            simulationToggle.isOn = true;
-            productionToggle.isOn = false;
-            ConnectionConfig.SelectedMode = ConnectionConfig.Mode.Simulation;
+            telloToggle.SetIsOnWithoutNotify(false);
+
+            bool isProduction =
+                ConnectionConfig.SelectedMode == ConnectionConfig.Mode.Production;
+
+            productionToggle.SetIsOnWithoutNotify(isProduction);
+            simulationToggle.SetIsOnWithoutNotify(!isProduction);
         }
 
-        comInputField.text = ConnectionConfig.ComPort; comInputField.interactable = productionToggle.isOn;
+        comInputField.text = ConnectionConfig.ComPort;
+        comInputField.interactable = productionToggle.isOn;
+        connectButton.interactable =
+            ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.GPS;
 
         droneFlowToggle.isOn = false; circuitToggle.isOn = false; easyToggle.isOn = false; hardToggle.isOn = false; searchToggle.isOn = false;
         //Comentamos estas dos lineas para mantener es escenario carrgado
@@ -80,6 +90,7 @@ public class MenuController : MonoBehaviour
 
         simulationToggle.onValueChanged.AddListener(OnSimulationToggle);
         productionToggle.onValueChanged.AddListener(OnProductionToggle);
+        telloToggle.onValueChanged.AddListener(OnTelloToggle);
         connectButton.onClick.AddListener(OnConnectClicked);
         playButton.onClick.AddListener(OnPlayClicked);
 
@@ -101,35 +112,71 @@ public class MenuController : MonoBehaviour
     }
     void OnSimulationToggle(bool on)
     {
-        if (on)
+        if (!on)
         {
-            productionToggle.isOn = false;
+            if (!productionToggle.isOn && !telloToggle.isOn)
+                simulationToggle.SetIsOnWithoutNotify(true);
 
-            ConnectionConfig.SelectedMode = ConnectionConfig.Mode.Simulation;
-            comInputField.interactable = false;
-            InvalidateConnect();
-            ValidatePlay();
+            return;
         }
-        else if (!productionToggle.isOn)
-        {
-            simulationToggle.isOn = true;
-        }
+
+        productionToggle.SetIsOnWithoutNotify(false);
+        telloToggle.SetIsOnWithoutNotify(false);
+
+        ConnectionConfig.SelectedDrone = ConnectionConfig.DroneType.GPS;
+        ConnectionConfig.SelectedMode = ConnectionConfig.Mode.Simulation;
+
+        comInputField.interactable = false;
+        connectButton.interactable = true;
+
+        InvalidateConnect();
+        ValidatePlay();
     }
+
     void OnProductionToggle(bool on)
     {
-        if (on)
+        if (!on)
         {
-            simulationToggle.isOn = false;
-            ConnectionConfig.SelectedMode = ConnectionConfig.Mode.Production;
-            comInputField.interactable = true;
-            InvalidateConnect();
-            ValidatePlay();
+            if (!simulationToggle.isOn && !telloToggle.isOn)
+                productionToggle.SetIsOnWithoutNotify(true);
+
+            return;
         }
-        else if (!simulationToggle.isOn)
+
+        simulationToggle.SetIsOnWithoutNotify(false);
+        telloToggle.SetIsOnWithoutNotify(false);
+
+        ConnectionConfig.SelectedDrone = ConnectionConfig.DroneType.GPS;
+        ConnectionConfig.SelectedMode = ConnectionConfig.Mode.Production;
+
+        comInputField.interactable = true;
+        connectButton.interactable = true;
+
+        InvalidateConnect();
+        ValidatePlay();
+    }
+    void OnTelloToggle(bool on)
+    {
+        if (!on)
         {
-            // Forzar a quedarse marcado si se intenta desmarcar y el otro no está activo
-            productionToggle.isOn = true;
+            if (!simulationToggle.isOn && !productionToggle.isOn)
+                telloToggle.SetIsOnWithoutNotify(true);
+
+            return;
         }
+
+        simulationToggle.SetIsOnWithoutNotify(false);
+        productionToggle.SetIsOnWithoutNotify(false);
+
+        ConnectionConfig.SelectedDrone = ConnectionConfig.DroneType.Tello;
+
+        comInputField.interactable = false;
+
+        // La conexión Tello todavía no está implementada.
+        InvalidateConnect();
+        connectButton.interactable = false;
+
+        ValidatePlay();
     }
     void OnCreateScenarioClicked()
     {
@@ -191,6 +238,9 @@ public class MenuController : MonoBehaviour
     }
     void OnConnectClicked()
     {
+        if (ConnectionConfig.SelectedDrone != ConnectionConfig.DroneType.GPS)
+            return;
+
         InvalidateConnect();
 
         if (DroneConnectionManager.Instance == null)
@@ -235,12 +285,26 @@ public class MenuController : MonoBehaviour
     }
     void ValidatePlay()
     {
-        bool modeSelected = simulationToggle.isOn || productionToggle.isOn;
-        bool scenarioSelected = ConnectionConfig.SelectedScenario != ConnectionConfig.Scenario.None;
-        playButton.interactable = ConnectionConfig.ConnectRequested && modeSelected && scenarioSelected;
+        bool modeSelected =
+            simulationToggle.isOn ||
+            productionToggle.isOn ||
+            telloToggle.isOn;
+
+        bool scenarioSelected =
+            ConnectionConfig.SelectedScenario != ConnectionConfig.Scenario.None;
+
+        bool connectionReady =
+            ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.GPS &&
+            ConnectionConfig.ConnectRequested;
+
+        playButton.interactable =
+            connectionReady && modeSelected && scenarioSelected;
     }
     void OnPlayClicked()
     {
+        if (ConnectionConfig.SelectedDrone != ConnectionConfig.DroneType.GPS)
+            return;
+
         if (!ConnectionConfig.ConnectRequested)
         {
             Debug.LogWarning("PLAY bloqueado: primero CONNECT (y debe verificar bien).");

@@ -25,8 +25,6 @@ public class StatesHUD : MonoBehaviour
     {
         if (drone == null) return;
 
-        //Llamamos a la funcion GetCurrentGPS() para que actualice los valores de altitud.
-        var (_, _, alt, heading) = drone.GetCurrentGPS();
         float voltage = drone.GetBatteryVoltage_V();
         float current = drone.GetBatteryCurrent_A();
         float remaining = drone.GetBatteryRemaining_pct();
@@ -36,9 +34,21 @@ public class StatesHUD : MonoBehaviour
 
         if (telemetryText)
         {
-            telemetryText.text =
-              $"ALT: {alt:0.0000} m\n" +
-              $"HDG: {heading:0.00}°";
+            if (ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.GPS)
+            {
+                var (_, _, alt, heading) = drone.GetCurrentGPS();
+
+                telemetryText.text =
+                    $"ALT: {alt:0.0000} m\n" +
+                    $"HDG: {heading:0.00}°";
+            }
+            else
+            {
+                // Pendiente de integrar la telemetría real del Tello.
+                telemetryText.text =
+                    "ALT: --\n" +
+                    "HDG: --";
+            }
         }
 
         if (batteryText)

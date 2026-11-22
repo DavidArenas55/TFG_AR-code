@@ -2,6 +2,14 @@ using System.Collections.Generic;
 
 public static class ConnectionConfig
 {
+    public enum DroneType
+    {
+        GPS = 0,
+        Tello = 1
+    }
+
+    // Dron seleccionado. GPS por defecto.
+    public static DroneType SelectedDrone = DroneType.GPS;
     public enum Mode { Simulation, Production }
     public enum Scenario { None, DroneFlow, Circuit, Easy, Hard, Search, Custom }
 
