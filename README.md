@@ -336,3 +336,19 @@ Las siguientes fases previstas son:
 
 Estas funcionalidades todavía no forman parte de la implementación actual.
 
+## 10. DJI RoboMaster Tello Talent en Windows
+
+La conexión con el Tello se ha validado desde Python con MoreTelloLink. La integración con el menú de Unity está pendiente.
+
+Para preparar el entorno, instala Git y Python 3.14 de 64 bits. Ejecuta estos comandos en PowerShell desde la raíz del proyecto, con acceso a Internet:
+
+```powershell
+.\Tools\Tello\setup.ps1
+py -3.14 -m venv .\Tools\Tello\.venv
+.\Tools\Tello\.venv\Scripts\python.exe -m pip install --only-binary=:all: djitellopy opencv-python pygame-ce
+```
+
+`setup.ps1` descarga la revisión fijada de MoreTelloLink en `Tools/Tello/MoreTelloLink`. El entorno `Tools/Tello/.venv` contiene `djitellopy` para la comunicación por UDP, `opencv-python` para las funciones de cámara y `pygame-ce`, que proporciona el módulo `pygame` compatible con Python 3.14 en Windows. Git ignora ambas carpetas locales.
+
+Para comunicarse con el dron, el PC debe estar conectado a su Wi‑Fi `TELLO-...`. En ese modo, el Tello recibe comandos del SDK en `192.168.10.1:8889` por UDP.
+

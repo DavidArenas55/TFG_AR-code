@@ -1,19 +1,19 @@
-using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
+using System.Threading.Tasks;
 
 public class MenuController : MonoBehaviour
 {
     private bool isUpdatingToggles = false;
 
     [Header("UI")]
-    public Toggle simulationToggle; 
+    public Toggle simulationToggle;
     public Toggle productionToggle;
     public Toggle telloToggle;
-    public InputField comInputField; 
+    public InputField comInputField;
     public Text debugText;
     public Button connectButton; public Button playButton;
 
@@ -81,9 +81,13 @@ public class MenuController : MonoBehaviour
         comInputField.text = ConnectionConfig.ComPort;
         comInputField.interactable = productionToggle.isOn;
         connectButton.interactable =
-            ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.GPS;
+            ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.GPS || ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.Tello;
 
-        droneFlowToggle.isOn = false; circuitToggle.isOn = false; easyToggle.isOn = false; hardToggle.isOn = false; searchToggle.isOn = false;
+        droneFlowToggle.isOn = false;
+        circuitToggle.isOn = false;
+        easyToggle.isOn = false;
+        hardToggle.isOn = false;
+        searchToggle.isOn = false;
         //Comentamos estas dos lineas para mantener es escenario carrgado
         //ConnectionConfig.SelectedScenario = ConnectionConfig.Scenario.None;
         //ConnectionConfig.ConnectRequested = false;
@@ -132,7 +136,6 @@ public class MenuController : MonoBehaviour
         InvalidateConnect();
         ValidatePlay();
     }
-
     void OnProductionToggle(bool on)
     {
         if (!on)
@@ -174,7 +177,7 @@ public class MenuController : MonoBehaviour
 
         // La conexión Tello todavía no está implementada.
         InvalidateConnect();
-        connectButton.interactable = false;
+        connectButton.interactable = true;
 
         ValidatePlay();
     }
@@ -238,6 +241,12 @@ public class MenuController : MonoBehaviour
     }
     void OnConnectClicked()
     {
+        if (ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.Tello)
+        {
+            ConnectTello();
+            return;
+        }
+
         if (ConnectionConfig.SelectedDrone != ConnectionConfig.DroneType.GPS)
             return;
 
@@ -338,7 +347,7 @@ public class MenuController : MonoBehaviour
     {
         ConnectionConfig.ConnectRequested = false;
         playButton.interactable = false;
-    } 
+    }
     void UpdateSelectedCustomScenarioText()
     {
         if (selectedCustomScenarioText == null)
@@ -354,5 +363,84 @@ public class MenuController : MonoBehaviour
         {
             selectedCustomScenarioText.text = "Selected: None";
         }
+    }
+    private async void ConnectTello()
+    {
+        connectButton.interactable = false;
+        simulationToggle.interactable = false;
+        productionToggle.interactable = false;
+        telloToggle.interactable = false;
+        debugText.text = "Conectando con Tello…";
+        debugText.color = Color.white;
+        connectionYESImage.SetActive(false);
+
+        try
+        {
+            string toolsPath = Path.GetFullPath(
+                Path.Combine(Application.dataPath, "..", "Tools", "Tello"));
+
+            string output = await Task.Run(() => RunTelloConnection(toolsPath));
+            if (this == null)
+                return;
+
+            debugText.text = int.TryParse(output, out int battery)
+                ? $"Tello conectado · Batería: {battery} %"
+                : "Tello conectado";
+            debugText.color = Color.green;
+            connectionYESImage.SetActive(true);
+        }
+        catch (System.Exception error)
+        {
+            if (this == null)
+                return;
+
+            debugText.text = "No se pudo conectar con Tello.";
+            debugText.color = Color.red;
+            Debug.LogWarning($"Tello: {error.Message}");
+        }
+        finally
+        {
+            if (this != null)
+            {
+                connectButton.interactable = true;
+                simulationToggle.interactable = true;
+                productionToggle.interactable = true;
+                telloToggle.interactable = true;
+            }
+        }
+    }
+    private static string RunTelloConnection(string toolsPath)
+    {
+        string python = Path.Combine(toolsPath, ".venv", "Scripts", "python.exe");
+
+        var startInfo = new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = python,
+            Arguments = "-u connect_tello.py",
+            WorkingDirectory = toolsPath,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+
+        using var process = System.Diagnostics.Process.Start(startInfo);
+        if (process == null)
+            throw new System.InvalidOperationException("No se pudo iniciar Python.");
+
+        Task<string> output = process.StandardOutput.ReadToEndAsync();
+        Task<string> error = process.StandardError.ReadToEndAsync();
+
+        if (!process.WaitForExit(30000))
+        {
+            process.Kill();
+            process.WaitForExit();
+            throw new System.TimeoutException("El Tello no respondió a tiempo.");
+        }
+
+        if (process.ExitCode != 0)
+            throw new System.InvalidOperationException(error.GetAwaiter().GetResult().Trim());
+
+        return output.GetAwaiter().GetResult().Trim();
     }
 }
