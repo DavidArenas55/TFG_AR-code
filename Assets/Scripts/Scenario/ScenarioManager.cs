@@ -60,7 +60,7 @@ public class ScenarioManager : MonoBehaviour
 
         if (ConnectionConfig.SelectedMode == ConnectionConfig.Mode.Simulation)
         {
-            fences.SetActive(true);
+            fences.SetActive(ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.GPS);
             ground.SetActive(true);
         }
 

@@ -9,11 +9,10 @@ public class WebCamDisplay : MonoBehaviour
     public AspectRatioFitter aspectFitter;
     public Material undistortMaterial;
     public string calibrationFile = "calibration_data.json";
-
     public Dropdown cameraDropdown;
-
     private WebCamTexture webCamTexture;
     private WebCamDevice[] devices;
+    private TelloVideoDisplay telloVideoDisplay;
 
     [System.Serializable]
     private class CalibrationData
@@ -24,6 +23,22 @@ public class WebCamDisplay : MonoBehaviour
     }
     void Start()
     {
+        if (!rawImage)
+        {
+            Debug.LogError("WebCamDisplay: rawImage no asignado.");
+            enabled = false;
+            return;
+        }
+
+        if (ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.Tello)
+        {
+            if (cameraDropdown != null)
+                cameraDropdown.gameObject.SetActive(false);
+
+            telloVideoDisplay = gameObject.AddComponent<TelloVideoDisplay>();
+            telloVideoDisplay.StartStream(rawImage, aspectFitter);
+            return;
+        }
         if (ConnectionConfig.SelectedDrone == ConnectionConfig.DroneType.Tello)
             return;
 
@@ -160,6 +175,8 @@ public class WebCamDisplay : MonoBehaviour
     // Detiene la cámara web y limpia la imagen en la UI.
     public void StopWebcam()
     {
+        telloVideoDisplay?.StopStream();
+
         if (webCamTexture != null && webCamTexture.isPlaying)
         {
             Debug.Log("Deteniendo la cámara web.");

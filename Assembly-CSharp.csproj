@@ -93,6 +93,7 @@
     <Compile Include="Assets\Scripts\UI\TooltipUI.cs" />
     <Compile Include="Assets\Scripts\UI\Map\MapPositionSelector.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
+    <Compile Include="Assets\Scripts\Drone\Video\TelloVideoDisplay.cs" />
     <Compile Include="Assets\Scripts\Results\OptimalAndRealPath.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\Internal\CDT\CDT_Utility.cs" />
     <Compile Include="Assets\Props&amp;TexturesAssetStore\Hanzzz\MeshDemolisher\Scripts\PointGenerator.cs" />
